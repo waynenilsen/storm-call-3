@@ -10,7 +10,9 @@
     "format": "biome format --write",
     "check:all": "bunx tsc --noEmit && bunx biome check --write && bunx biome format --write",
     "initialize-workspace": "./scripts/initialize-workspace.sh",
-    "stop-workspace": "./scripts/stop-workspace.sh"
+    "stop-workspace": "./scripts/stop-workspace.sh",
+    "get-dev-port": "dotenv -- node -e \"console.log(process.env.PORT ?? '')\"",
+    "get-db-port": "dotenv -- node -e \"console.log(process.env.DATABASE_PORT ?? '')\""
   },
   "dependencies": {
     "next": "16.2.4",
