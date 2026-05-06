@@ -14,3 +14,7 @@ Use `bun get-dev-port` and `bun get-db-port` to get the ports
 
 we use postgres
 nextjs
+
+if i say YOLOYOLO that means commit, push make the pr using gh cli and merge it to main don't ask me for permission.
+
+when you write commit messages use conventional commits and make the commit messages extremely brutally detailed including business reasons for the changes when it makes sense
