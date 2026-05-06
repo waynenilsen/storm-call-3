@@ -35,7 +35,9 @@ sed_inplace "s/@localhost:[0-9][0-9]*/@localhost:$DATABASE_PORT/g" .env
 docker compose down --remove-orphans
 docker compose up -d
 echo "docker-compose.yml generated and containers started. Waiting for postgres to be ready..."
-while ! docker exec storm-call-3-postgres-1 pg_isready -U postgres; do
+# Use service name `postgres`, not `${COMPOSE_PROJECT_NAME}-postgres-1` — project name comes from the
+# parent directory (e.g. sarajevo-postgres-1), so a fixed repo slug breaks clones in other paths.
+while ! docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1; do
     echo "Waiting for postgres to be ready..."
     sleep 1
 done
