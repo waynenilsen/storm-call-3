@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
+    "lint": "biome check --write",
+    "format": "biome format --write",
+    "check:all": "bunx tsc --noEmit && bunx biome check --write && bunx biome format --write"
   },
   "dependencies": {
     "next": "16.2.4",
