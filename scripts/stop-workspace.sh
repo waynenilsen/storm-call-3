@@ -28,4 +28,9 @@ else
 fi
 echo "Searching for orphaned dev server processes... done"
 
+echo "cleaning up node_modules..."
+rm -rf node_modules
+echo "cleaning up node_modules... done"
+
+
 echo "Workspace stopped"
