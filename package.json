@@ -12,10 +12,16 @@
     "initialize-workspace": "./scripts/initialize-workspace.sh",
     "stop-workspace": "./scripts/stop-workspace.sh",
     "get-dev-port": "dotenv -- node -e \"console.log(process.env.PORT ?? '')\"",
-    "get-db-port": "dotenv -- node -e \"console.log(process.env.DATABASE_PORT ?? '')\""
+    "get-db-port": "dotenv -- node -e \"console.log(process.env.DATABASE_PORT ?? '')\"",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -25,6 +31,7 @@
     "lucide-react": "^1.14.0",
     "next": "16.2.4",
     "next-themes": "^0.4.6",
+    "pg": "^8.20.0",
     "react": "19.2.4",
     "react-day-picker": "^9.14.0",
     "react-dom": "19.2.4",
@@ -40,9 +47,11 @@
     "@biomejs/biome": "2.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
