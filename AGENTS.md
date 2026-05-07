@@ -26,3 +26,5 @@ we use bun test to test stuff it runs the official built in bun test harness it 
 tests are alongside code not in a separate test folder
 
 db tests must be parallelizable
+
+you must not add test as a script in package json bun test runs the tests it is a built in command and running commands with bun works as bun <command> so adding a test command is redundant and actually confusing because you end up in a situation where bun test runs the built in command but bun run test actually works and runs the script. not good.
