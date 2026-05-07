@@ -29,7 +29,9 @@ fi
 
 # Host port reserved for this workspace (avoid collisions when many clones run Postgres locally).
 DATABASE_PORT=$((50000 + RANDOM % 10000))
-sed_inplace "s/DATABASE_PORT:5432/${DATABASE_PORT}:5432/g" docker-compose.yml
+# Compose may already have a numeric "HOST:5432"; keep it aligned with DATABASE_PORT whenever we init.
+sed_inplace "s|\"DATABASE_PORT:5432\"|\"${DATABASE_PORT}:5432\"|g" docker-compose.yml
+sed_inplace "s|\"[0-9][0-9]*:5432\"|\"${DATABASE_PORT}:5432\"|g" docker-compose.yml
 sed_inplace "s/^DATABASE_PORT=.*/DATABASE_PORT=$DATABASE_PORT/" .env
 sed_inplace "s/@localhost:[0-9][0-9]*/@localhost:$DATABASE_PORT/g" .env
 docker compose down --remove-orphans

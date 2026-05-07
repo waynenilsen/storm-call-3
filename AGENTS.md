@@ -51,6 +51,7 @@ trpc must contain authorization authentication and data validation
 
 - not unit tested unit tests happen elsewhere this is not the proper layer
 - trpc should be a thin layer
+- input validation is done at the trpc layer not in the service layer
 
 service layer must contain business logic
 
