@@ -1,65 +1,132 @@
-import Image from "next/image";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { Clock, Radio, Wifi, WifiOff } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTRPC } from "@/lib/trpc/client";
 
 export default function Home() {
+  const trpc = useTRPC();
+  const timeQuery = useQuery(
+    trpc.time.queryOptions(undefined, {
+      refetchInterval: 1000,
+      refetchIntervalInBackground: true,
+    }),
+  );
+
+  const now = timeQuery.data?.now;
+  const isLive = timeQuery.status === "success" && !timeQuery.isError;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="flex flex-1 items-center justify-center p-6">
+      <Card className="w-full max-w-xl">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Clock className="size-4 text-muted-foreground" />
+            <CardTitle>Polling clock</CardTitle>
+            <Badge variant={isLive ? "default" : "secondary"} className="ml-2">
+              {isLive ? (
+                <Wifi className="size-3" />
+              ) : (
+                <WifiOff className="size-3" />
+              )}
+              {isLive ? "live" : timeQuery.status}
+            </Badge>
+          </div>
+          <CardDescription>
+            tRPC v11 procedure <code className="font-mono">time</code>{" "}
+            re-fetched every <span className="font-mono">1000ms</span> via
+            TanStack Query. The wire payload is superjson-encoded so{" "}
+            <code className="font-mono">now</code> is a real{" "}
+            <code className="font-mono">Date</code> on the client.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <div className="flex flex-col items-center justify-center rounded-lg border bg-muted/40 py-10">
+            {now ? (
+              <span className="font-mono text-5xl font-semibold tracking-tight tabular-nums">
+                {now.toLocaleTimeString()}
+              </span>
+            ) : (
+              <Skeleton className="h-12 w-56" />
+            )}
+            <span className="mt-2 text-xs text-muted-foreground font-mono">
+              {now?.toDateString() ?? " "}
+            </span>
+          </div>
+
+          <Separator />
+
+          <dl className="grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted-foreground">ISO</dt>
+            <dd className="font-mono break-all">
+              {now?.toISOString() ?? <Skeleton className="h-4 w-64" />}
+            </dd>
+
+            <dt className="text-muted-foreground">runtime type</dt>
+            <dd>
+              {now ? (
+                <Badge
+                  variant={now instanceof Date ? "default" : "destructive"}
+                >
+                  {now instanceof Date ? "Date (superjson)" : typeof now}
+                </Badge>
+              ) : (
+                <Skeleton className="h-5 w-24" />
+              )}
+            </dd>
+
+            <dt className="text-muted-foreground">status</dt>
+            <dd>
+              <Badge variant="outline" className="font-mono">
+                {timeQuery.status}
+              </Badge>
+            </dd>
+
+            <dt className="text-muted-foreground">fetching</dt>
+            <dd className="flex items-center gap-2">
+              <Radio
+                className={
+                  timeQuery.isFetching
+                    ? "size-3.5 animate-pulse text-emerald-500"
+                    : "size-3.5 text-muted-foreground/40"
+                }
+              />
+              <span className="font-mono text-xs text-muted-foreground">
+                {timeQuery.isFetching ? "in flight" : "idle"}
+              </span>
+            </dd>
+
+            <dt className="text-muted-foreground">last update</dt>
+            <dd className="font-mono text-xs text-muted-foreground">
+              {timeQuery.dataUpdatedAt
+                ? new Date(timeQuery.dataUpdatedAt).toLocaleTimeString(
+                    undefined,
+                    {
+                      hour12: false,
+                    },
+                  )
+                : "—"}
+            </dd>
+          </dl>
+        </CardContent>
+
+        <CardFooter className="text-xs text-muted-foreground">
+          GET /api/trpc/time · refetchInterval: 1000ms ·
+          refetchIntervalInBackground: true
+        </CardFooter>
+      </Card>
+    </main>
   );
 }
