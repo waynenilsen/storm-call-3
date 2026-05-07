@@ -26,3 +26,5 @@ we use bun test to test stuff it runs the official built in bun test harness it 
 tests are alongside code not in a separate test folder
 
 db tests must be parallelizable
+
+you must never use uuid you must always use cuid
