@@ -77,3 +77,5 @@ always maintain bookkeeping records
 - updated at
 
 be flexible, lean on nullable fields fairly often
+
+lean on type infenence - mostly don't be explicit about return types - mostly lean on existing types from typegen from zod and/or prisma
