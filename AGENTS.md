@@ -18,3 +18,11 @@ nextjs
 if i say YOLOYOLO that means commit, push make the pr using gh cli and merge it to main don't ask me for permission.
 
 when you write commit messages use conventional commits and make the commit messages extremely brutally detailed including business reasons for the changes when it makes sense
+
+i own this file llm does not edit this file
+
+we use bun test to test stuff it runs the official built in bun test harness it is fast and efficient
+
+tests are alongside code not in a separate test folder
+
+db tests must be parallelizable
