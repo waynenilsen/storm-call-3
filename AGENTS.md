@@ -25,8 +25,54 @@ we use bun test to test stuff it runs the official built in bun test harness it 
 
 tests are alongside code not in a separate test folder
 
-db tests must be parallelizable
+there is a ./test dir which holds test framework code
+
+db tests must be parallelizable - the test parallelism strategy is very important and there are some rules
+
+- we use postgres as you may or may not know at this point
+- we use the same db and schema for all of the tests
+- it is assumed that when bun test starts, the db is up and the migrations have run (some migrations may have some needed data that is ok)
+- then- understand this - do not delete to clean up your stuff - ever - it slows down tests! this is bad we want our tests to be very fast
+- the fastest test is like this - any resource you need to hang your stuff off should dangle from the root
+- this means we cannot have global state, and that is ok
+- so its like this, every user, every org, every record, is created with its dep chain
+- this happens in a test framework
+- it is ok and sometimes required
 
 you must never use uuid you must always use cuid
 
 you must not add test as a script in package json bun test runs the tests it is a built in command and running commands with bun works as bun <command> so adding a test command is redundant and actually confusing because you end up in a situation where bun test runs the built in command but bun run test actually works and runs the script. not good.
+
+we use a service oriented architecture but it is quite straightforward
+
+frontend -> trpc -> service layer -> db (prisma)
+
+trpc must contain authorization authentication and data validation
+
+- not unit tested unit tests happen elsewhere this is not the proper layer
+- trpc should be a thin layer
+
+service layer must contain business logic
+
+- heavily unit tested
+- even simple crud ops must flow through
+- pass tx via parameter injection always optional
+- no bare use of prisma touching other resources
+- ideally 1 service layer file per resource - that is, as we define it in this repo, a model in prisma
+- avoid joins prefer frontend to grab required assoc resources with filters and compose in frontend for performance
+- list functions should always have filter and limit offset pagination built in
+- filters should be based directly on the resource fields available
+- whenever we want to filter by some field on an associated resource then we can join but the select should be selecting out just the fields from the resource OR we denormalize if we can figure it doesn't change often or at all.
+
+-- regarding schema design --
+
+occasionally denormalization may be required and thats ok for performance, prefer that over joins for data that do not change often, its worth the overhead of invalidation and update for the read performance especially in read heavy application
+
+always use cuid
+
+always maintain bookkeeping records
+
+- created at
+- updated at
+
+be flexible, lean on nullable fields fairly often
