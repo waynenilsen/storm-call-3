@@ -1,19 +1,10 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
-import { z } from "zod";
 
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { BCRYPT_COST, emailSchema, signUpPasswordSchema } from "./schemas";
+import { BCRYPT_COST, type SignUpInput } from "./schemas";
 import { createSession } from "./session";
-
-export const signUpInputSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  email: emailSchema,
-  password: signUpPasswordSchema,
-});
-
-export type SignUpInput = z.infer<typeof signUpInputSchema>;
 
 type SignedUpUserRow = {
   id: string;

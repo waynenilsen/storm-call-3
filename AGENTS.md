@@ -79,3 +79,5 @@ always maintain bookkeeping records
 be flexible, lean on nullable fields fairly often
 
 lean on type infenence - mostly don't be explicit about return types - mostly lean on existing types from typegen from zod and/or prisma
+
+hoist zod schemas and zod inferred types to a separate file whenever possible see ./lib/auth for example - this helps keep frontend and backend code separated

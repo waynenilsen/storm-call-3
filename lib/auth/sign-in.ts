@@ -1,15 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
-import { z } from "zod";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { BCRYPT_COST, emailSchema, signInPasswordSchema } from "./schemas";
-
-export const signInInputSchema = z.object({
-  email: emailSchema,
-  password: signInPasswordSchema,
-});
-
-export type SignInInput = z.infer<typeof signInInputSchema>;
+import { BCRYPT_COST, type SignInInput } from "./schemas";
 
 const DUMMY_PASSWORD_HASH: Promise<string> = Bun.password.hash(
   "__sign_in_timing_pad__",

@@ -2,8 +2,9 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
 import { prisma } from "../prisma";
+import { signUpInputSchema } from "./schemas";
 import { signIn } from "./sign-in";
-import { signUp, signUpInputSchema } from "./sign-up";
+import { signUp } from "./sign-up";
 
 describe("signIn", () => {
   afterAll(async () => {

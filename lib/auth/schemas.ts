@@ -18,3 +18,24 @@ export const signUpPasswordSchema = z
  * via input validation.
  */
 export const signInPasswordSchema = z.string();
+
+export const signUpInputSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  email: emailSchema,
+  password: signUpPasswordSchema,
+});
+
+export type SignUpInput = z.infer<typeof signUpInputSchema>;
+
+export const signInInputSchema = z.object({
+  email: emailSchema,
+  password: signInPasswordSchema,
+});
+
+export type SignInInput = z.infer<typeof signInInputSchema>;
+
+export const signOutInputSchema = z.object({
+  token: z.string().min(1).max(200),
+});
+
+export type SignOutInput = z.infer<typeof signOutInputSchema>;

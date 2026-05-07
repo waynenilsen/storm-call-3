@@ -3,7 +3,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
 
 import { prisma } from "../prisma";
-import { signUp, signUpInputSchema } from "./sign-up";
+import { signUpInputSchema } from "./schemas";
+import { signUp } from "./sign-up";
 
 describe("signUp", () => {
   afterAll(async () => {
