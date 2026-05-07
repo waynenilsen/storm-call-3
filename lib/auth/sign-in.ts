@@ -1,12 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { BCRYPT_COST, type SignInInput } from "./schemas";
-
-const DUMMY_PASSWORD_HASH: Promise<string> = Bun.password.hash(
-  "__sign_in_timing_pad__",
-  { algorithm: "bcrypt", cost: BCRYPT_COST },
-);
+import { timingPadDummyHash, verifyPassword } from "./password";
+import type { SignInInput } from "./schemas";
 
 export async function signIn(
   params: SignInInput,
@@ -23,11 +19,8 @@ export async function signIn(
     },
   });
 
-  const hashForVerify = user?.passwordHash ?? (await DUMMY_PASSWORD_HASH);
-  const passwordMatches = await Bun.password.verify(
-    params.password,
-    hashForVerify,
-  );
+  const hashForVerify = user?.passwordHash ?? (await timingPadDummyHash);
+  const passwordMatches = await verifyPassword(params.password, hashForVerify);
 
   if (!user || !passwordMatches) {
     return { ok: false as const };

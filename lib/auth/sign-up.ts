@@ -3,7 +3,8 @@ import type { PrismaClient } from "@prisma/client";
 
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { BCRYPT_COST, type SignUpInput } from "./schemas";
+import { hashPassword } from "./password";
+import type { SignUpInput } from "./schemas";
 import { createSession } from "./session";
 
 type SignedUpUserRow = {
@@ -14,10 +15,7 @@ type SignedUpUserRow = {
 };
 
 export async function signUp(params: SignUpInput, tx?: PrismaTransaction) {
-  const passwordHash = await Bun.password.hash(params.password, {
-    algorithm: "bcrypt",
-    cost: BCRYPT_COST,
-  });
+  const passwordHash = await hashPassword(params.password);
   const id = createId();
 
   const run = async (runner: PrismaTransaction | PrismaClient) => {

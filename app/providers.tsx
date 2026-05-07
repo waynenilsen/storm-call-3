@@ -33,6 +33,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: getUrl(),
           transformer: superjson,
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: "include",
+            });
+          },
         }),
       ],
     }),
@@ -41,7 +47,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {children}
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
         <ReactQueryDevtools initialIsOpen={false} />
       </TRPCProvider>
     </QueryClientProvider>

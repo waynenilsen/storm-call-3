@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "tRPC polling clock",
-  description: "tRPC v11 + TanStack Query polling clock demo on shadcn/ui",
+  title: "Storm Call",
+  description: "Session-based auth via tRPC and TanStack Query",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="flex min-h-screen flex-col bg-background text-foreground">
         <Providers>{children}</Providers>
       </body>
     </html>

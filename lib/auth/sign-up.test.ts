@@ -3,6 +3,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
 
 import { prisma } from "../prisma";
+import { verifyPassword } from "./password";
 import { signUpInputSchema } from "./schemas";
 import { signUp } from "./sign-up";
 
@@ -36,7 +37,7 @@ describe("signUp", () => {
     });
     expect(stored.passwordHash).not.toContain("correct");
     await expect(
-      Bun.password.verify("correct horse battery staple", stored.passwordHash),
+      verifyPassword("correct horse battery staple", stored.passwordHash),
     ).resolves.toBe(true);
   });
 
