@@ -48,6 +48,10 @@ PORT=$((50000 + RANDOM % 10000))
 sed_inplace "s/^PORT=.*/PORT=$PORT/" .env
 echo "Web app port set to $PORT"
 
+echo "Running database migrations..."
+bun x dotenv -- bun x prisma migrate deploy
+echo "Database migrations applied"
+
 
 echo "--------------------------------"
 echo "Workspace initialized"
