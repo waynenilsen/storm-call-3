@@ -2,24 +2,24 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
 import { createOrganization } from "@/lib/organizations/create";
-import { makeEmployeeWithOrg } from "@/test/test-employee";
+import { makeContactWithOrg } from "@/test/test-contact";
 import { makeUser } from "@/test/test-user";
 
 import { prisma } from "../prisma";
 
-import { EmployeeNotInOrganizationError, updateEmployee } from "./update";
+import { ContactNotInOrganizationError, updateContact } from "./update";
 
-describe("updateEmployee", () => {
+describe("updateContact", () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
   test("updates fields and refreshes updated-by audit metadata", async () => {
-    const { org, owner, employee } = await makeEmployeeWithOrg("emp-upd");
-    const editor = await makeUser("emp-upd-editor");
+    const { org, owner, contact } = await makeContactWithOrg("contact-upd");
+    const editor = await makeUser("contact-upd-editor");
     const slug = createId();
-    const updated = await updateEmployee({
-      id: employee.id,
+    const updated = await updateContact({
+      id: contact.id,
       organizationId: org.id,
       actingUserId: editor.id,
       name: `Renamed ${slug}`,
@@ -33,9 +33,10 @@ describe("updateEmployee", () => {
   });
 
   test("normalizes US phone on update", async () => {
-    const { org, owner, employee } = await makeEmployeeWithOrg("emp-upd-phone");
-    const updated = await updateEmployee({
-      id: employee.id,
+    const { org, owner, contact } =
+      await makeContactWithOrg("contact-upd-phone");
+    const updated = await updateContact({
+      id: contact.id,
       organizationId: org.id,
       actingUserId: owner.id,
       phone: "(206) 555-0199",
@@ -43,20 +44,20 @@ describe("updateEmployee", () => {
     expect(updated.phone).toBe("+12065550199");
   });
 
-  test("throws when the employee is not in the organization", async () => {
-    const { employee } = await makeEmployeeWithOrg("emp-upd-bad-org");
-    const stranger = await makeUser("emp-upd-stranger");
+  test("throws when the contact is not in the organization", async () => {
+    const { contact } = await makeContactWithOrg("contact-upd-bad-org");
+    const stranger = await makeUser("contact-upd-stranger");
     const otherOrg = await createOrganization({
       name: `Elsewhere ${createId()}`,
       ownerUserId: stranger.id,
     });
     await expect(
-      updateEmployee({
-        id: employee.id,
+      updateContact({
+        id: contact.id,
         organizationId: otherOrg.id,
         actingUserId: stranger.id,
         name: "Nope",
       }),
-    ).rejects.toBeInstanceOf(EmployeeNotInOrganizationError);
+    ).rejects.toBeInstanceOf(ContactNotInOrganizationError);
   });
 });

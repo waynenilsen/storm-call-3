@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  InvalidEmployeePhoneError,
+  InvalidContactPhoneError,
   normalizeIncomingUsPhoneToE164,
 } from "./phone-us";
 
@@ -22,25 +22,25 @@ describe("normalizeIncomingUsPhoneToE164", () => {
 
   test("rejects whitespace-only input", () => {
     expect(() => normalizeIncomingUsPhoneToE164("   \t")).toThrow(
-      InvalidEmployeePhoneError,
+      InvalidContactPhoneError,
     );
   });
 
   test("rejects non-US country calling codes", () => {
     expect(() => normalizeIncomingUsPhoneToE164("+44 7911 123456")).toThrow(
-      InvalidEmployeePhoneError,
+      InvalidContactPhoneError,
     );
   });
 
   test("rejects Mexican and other non-US country codes", () => {
     expect(() => normalizeIncomingUsPhoneToE164("+52 55 5123 4567")).toThrow(
-      InvalidEmployeePhoneError,
+      InvalidContactPhoneError,
     );
   });
 
   test("rejects invalid digit patterns", () => {
     expect(() => normalizeIncomingUsPhoneToE164("not-a-phone")).toThrow(
-      InvalidEmployeePhoneError,
+      InvalidContactPhoneError,
     );
   });
 });

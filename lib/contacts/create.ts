@@ -4,11 +4,11 @@ import type { PrismaClient } from "@prisma/client";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { normalizeIncomingUsPhoneToE164 } from "./phone-us";
-import { employeeRowSelect } from "./row-select";
-import type { CreateEmployeeInput } from "./schemas";
+import { contactRowSelect } from "./row-select";
+import type { CreateContactInput } from "./schemas";
 
-export async function createEmployee(
-  params: CreateEmployeeInput & { actingUserId: string },
+export async function createContact(
+  params: CreateContactInput & { actingUserId: string },
   tx?: PrismaTransaction,
 ) {
   const run = async (runner: PrismaTransaction | PrismaClient) => {
@@ -22,7 +22,7 @@ export async function createEmployee(
         ? undefined
         : normalizeIncomingUsPhoneToE164(params.phone);
 
-    return runner.employee.create({
+    return runner.contact.create({
       data: {
         id: createId(),
         organizationId: params.organizationId,
@@ -34,7 +34,7 @@ export async function createEmployee(
         createdByUserName: actor.name,
         updatedByUserName: actor.name,
       },
-      select: employeeRowSelect,
+      select: contactRowSelect,
     });
   };
 

@@ -4,18 +4,18 @@ model User {
   email          String               @unique
   passwordHash   String
   adminRole      String?
-  employeeId     String?
-  employee       Employee?            @relation("UserEmployeeLink", fields: [employeeId], references: [id], onDelete: SetNull)
+  contactId      String?
+  contact        Contact?             @relation("UserContactLink", fields: [contactId], references: [id], onDelete: SetNull)
   selectedOrganizationId String?
   selectedOrganization Organization?   @relation("UserSelectedOrganization", fields: [selectedOrganizationId], references: [id], onDelete: SetNull)
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   memberships    UserOrganization[]
   sessions       Session[]
-  employeesCreated Employee[]        @relation("EmployeeCreatedBy")
-  employeesUpdated Employee[]        @relation("EmployeeUpdatedBy")
-  calloutsCreated  Callout[]         @relation("CalloutCreatedBy")
-  calloutsUpdated  Callout[]         @relation("CalloutUpdatedBy")
+  contactsCreated Contact[]         @relation("ContactCreatedBy")
+  contactsUpdated Contact[]         @relation("ContactUpdatedBy")
+  calloutsCreated Callout[]         @relation("CalloutCreatedBy")
+  calloutsUpdated Callout[]         @relation("CalloutUpdatedBy")
 }
 
 model Organization {
@@ -26,7 +26,7 @@ model Organization {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   memberships UserOrganization[]
-  employees   Employee[]
+  contacts    Contact[]
   callouts    Callout[]
   usersHavingSelectedOrganization User[] @relation("UserSelectedOrganization")
 }

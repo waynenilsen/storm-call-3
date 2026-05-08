@@ -2,18 +2,18 @@ import type { PrismaClient } from "@prisma/client";
 
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { employeeRowSelect } from "./row-select";
-import type { EmployeeByIdInput } from "./schemas";
+import type { ContactByIdInput } from "./schemas";
 
-export async function getEmployeeInOrganization(
-  params: EmployeeByIdInput,
+export async function deleteContact(
+  params: ContactByIdInput,
   db: PrismaTransaction | PrismaClient = prisma,
 ) {
-  return db.employee.findFirst({
+  const result = await db.contact.deleteMany({
     where: {
       id: params.id,
       organizationId: params.organizationId,
     },
-    select: employeeRowSelect,
   });
+  if (result.count === 0) return { ok: false as const };
+  return { ok: true as const };
 }

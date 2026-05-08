@@ -2,49 +2,49 @@ import { z } from "zod";
 
 import { organizationIdSchema } from "../organizations/schemas";
 
-export const employeeIdSchema = z.string().min(1).max(64);
+export const contactIdSchema = z.string().min(1).max(64);
 
 /** Client-supplied phone before service-layer US → E.164 normalization (libphonenumber-js). */
-export const employeeOptionalPhoneRawSchema = z.preprocess((v) => {
+export const contactOptionalPhoneRawSchema = z.preprocess((v) => {
   if (v === undefined || v === null) return undefined;
   if (typeof v !== "string") return v;
   const t = v.trim();
   return t === "" ? undefined : t;
 }, z.string().max(64).optional());
 
-export const createEmployeeInputSchema = z.object({
+export const createContactInputSchema = z.object({
   organizationId: organizationIdSchema,
   name: z.string().trim().min(1).max(200).optional(),
   email: z.string().trim().email().max(254).optional(),
-  phone: employeeOptionalPhoneRawSchema,
+  phone: contactOptionalPhoneRawSchema,
 });
-export type CreateEmployeeInput = z.infer<typeof createEmployeeInputSchema>;
+export type CreateContactInput = z.infer<typeof createContactInputSchema>;
 
-export const updateEmployeeInputSchema = z
+export const updateContactInputSchema = z
   .object({
-    id: employeeIdSchema,
+    id: contactIdSchema,
     organizationId: organizationIdSchema,
     name: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().email().max(254).optional(),
-    phone: employeeOptionalPhoneRawSchema,
+    phone: contactOptionalPhoneRawSchema,
   })
   .refine(
     (v) =>
       v.name !== undefined || v.email !== undefined || v.phone !== undefined,
     { message: "at least one of name, email, or phone must be provided" },
   );
-export type UpdateEmployeeInput = z.infer<typeof updateEmployeeInputSchema>;
+export type UpdateContactInput = z.infer<typeof updateContactInputSchema>;
 
-export const employeeByIdInputSchema = z.object({
-  id: employeeIdSchema,
+export const contactByIdInputSchema = z.object({
+  id: contactIdSchema,
   organizationId: organizationIdSchema,
 });
-export type EmployeeByIdInput = z.infer<typeof employeeByIdInputSchema>;
+export type ContactByIdInput = z.infer<typeof contactByIdInputSchema>;
 
-export const listEmployeesInputSchema = z.object({
+export const listContactsInputSchema = z.object({
   organizationId: organizationIdSchema,
   search: z.string().trim().max(200).optional(),
   limit: z.number().int().min(1).max(100).default(50),
   offset: z.number().int().min(0).default(0),
 });
-export type ListEmployeesInput = z.infer<typeof listEmployeesInputSchema>;
+export type ListContactsInput = z.infer<typeof listContactsInputSchema>;

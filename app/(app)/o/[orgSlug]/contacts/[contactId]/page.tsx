@@ -18,10 +18,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ORG_ROLE } from "@/lib/organizations/schemas";
 import { useTRPC } from "@/lib/trpc/client";
 
-export default function OrgEmployeeDetailPage(props: {
-  params: Promise<{ orgSlug: string; employeeId: string }>;
+export default function OrgContactDetailPage(props: {
+  params: Promise<{ orgSlug: string; contactId: string }>;
 }) {
-  const { orgSlug, employeeId } = use(props.params);
+  const { orgSlug, contactId } = use(props.params);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -36,36 +36,36 @@ export default function OrgEmployeeDetailPage(props: {
     trpc.organizations.getBySlug.queryOptions({ slug: orgSlug }),
   );
 
-  const employeeQuery = useQuery(
-    trpc.employees.get.queryOptions(
+  const contactQuery = useQuery(
+    trpc.contacts.get.queryOptions(
       orgQuery.data
-        ? { id: employeeId, organizationId: orgQuery.data.id }
+        ? { id: contactId, organizationId: orgQuery.data.id }
         : skipToken,
     ),
   );
 
   useEffect(() => {
-    if (employeeQuery.data) {
-      setName(employeeQuery.data.name ?? "");
-      setEmail(employeeQuery.data.email ?? "");
-      setPhone(employeeQuery.data.phone ?? "");
+    if (contactQuery.data) {
+      setName(contactQuery.data.name ?? "");
+      setEmail(contactQuery.data.email ?? "");
+      setPhone(contactQuery.data.phone ?? "");
     }
-  }, [employeeQuery.data]);
+  }, [contactQuery.data]);
 
   const updateMutation = useMutation(
-    trpc.employees.update.mutationOptions({
+    trpc.contacts.update.mutationOptions({
       onSuccess: async () => {
         setError(null);
         if (orgQuery.data) {
           await Promise.all([
             queryClient.invalidateQueries(
-              trpc.employees.get.queryFilter({
-                id: employeeId,
+              trpc.contacts.get.queryFilter({
+                id: contactId,
                 organizationId: orgQuery.data.id,
               }),
             ),
             queryClient.invalidateQueries(
-              trpc.employees.list.queryFilter({
+              trpc.contacts.list.queryFilter({
                 organizationId: orgQuery.data.id,
               }),
             ),
@@ -77,22 +77,22 @@ export default function OrgEmployeeDetailPage(props: {
   );
 
   const deleteMutation = useMutation(
-    trpc.employees.delete.mutationOptions({
+    trpc.contacts.delete.mutationOptions({
       onSuccess: async () => {
         if (orgQuery.data) {
           await queryClient.invalidateQueries(
-            trpc.employees.list.queryFilter({
+            trpc.contacts.list.queryFilter({
               organizationId: orgQuery.data.id,
             }),
           );
         }
-        router.replace(`/o/${orgSlug}/employees`);
+        router.replace(`/o/${orgSlug}/contacts`);
       },
       onError: (err) => setError(err.message),
     }),
   );
 
-  if (orgQuery.isPending || employeeQuery.isPending) {
+  if (orgQuery.isPending || contactQuery.isPending) {
     return (
       <div className="flex flex-col gap-3">
         <Skeleton className="h-8 w-64" />
@@ -109,24 +109,24 @@ export default function OrgEmployeeDetailPage(props: {
     );
   }
 
-  if (employeeQuery.isError || !employeeQuery.data) {
+  if (contactQuery.isError || !contactQuery.data) {
     return (
       <div className="flex flex-col gap-3">
         <p className="text-sm text-destructive" role="alert">
-          {employeeQuery.error?.message ?? "Employee not found."}
+          {contactQuery.error?.message ?? "Contact not found."}
         </p>
         <Link
-          href={`/o/${orgSlug}/employees`}
+          href={`/o/${orgSlug}/contacts`}
           className="text-sm underline-offset-4 hover:underline"
         >
-          Back to employees
+          Back to contacts
         </Link>
       </div>
     );
   }
 
   const org = orgQuery.data;
-  const employee = employeeQuery.data;
+  const contact = contactQuery.data;
   const isOwner = org.role === ORG_ROLE.OWNER;
 
   const trimmedName = name.trim();
@@ -134,14 +134,14 @@ export default function OrgEmployeeDetailPage(props: {
   const trimmedPhone = phone.trim();
 
   const dirty =
-    trimmedName !== (employee.name ?? "") ||
-    trimmedEmail !== (employee.email ?? "") ||
-    trimmedPhone !== (employee.phone ?? "");
+    trimmedName !== (contact.name ?? "") ||
+    trimmedEmail !== (contact.email ?? "") ||
+    trimmedPhone !== (contact.phone ?? "");
 
   const saveDisabled = !isOwner || updateMutation.isPending || !dirty;
 
   const headingLabel =
-    employee.name ?? employee.email ?? employee.phone ?? "(no details)";
+    contact.name ?? contact.email ?? contact.phone ?? "(no details)";
 
   return (
     <div className="flex flex-col gap-6">
@@ -149,17 +149,17 @@ export default function OrgEmployeeDetailPage(props: {
         <div>
           <h1 className="text-lg font-medium">{headingLabel}</h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            Created by {employee.createdByUserName ?? "—"} ·{" "}
-            {employee.createdAt
-              ? new Date(employee.createdAt).toLocaleString()
+            Created by {contact.createdByUserName ?? "—"} ·{" "}
+            {contact.createdAt
+              ? new Date(contact.createdAt).toLocaleString()
               : "—"}
           </p>
         </div>
         <Link
-          href={`/o/${orgSlug}/employees`}
+          href={`/o/${orgSlug}/contacts`}
           className="text-sm text-muted-foreground underline-offset-4 hover:underline"
         >
-          ← All employees
+          ← All contacts
         </Link>
       </div>
 
@@ -175,7 +175,7 @@ export default function OrgEmployeeDetailPage(props: {
               if (saveDisabled) return;
               setError(null);
               updateMutation.mutate({
-                id: employee.id,
+                id: contact.id,
                 organizationId: org.id,
                 ...(trimmedName ? { name: trimmedName } : {}),
                 ...(trimmedEmail ? { email: trimmedEmail.toLowerCase() } : {}),
@@ -224,7 +224,7 @@ export default function OrgEmployeeDetailPage(props: {
           </form>
           {!isOwner ? (
             <p className="mt-3 text-xs text-muted-foreground">
-              Only owners can edit employees.
+              Only owners can edit contacts.
             </p>
           ) : null}
         </CardContent>
@@ -238,23 +238,23 @@ export default function OrgEmployeeDetailPage(props: {
           <div>
             <div className="text-xs text-muted-foreground">Created</div>
             <div>
-              {employee.createdAt
-                ? new Date(employee.createdAt).toLocaleString()
+              {contact.createdAt
+                ? new Date(contact.createdAt).toLocaleString()
                 : "—"}
             </div>
             <div className="text-xs text-muted-foreground">
-              by {employee.createdByUserName ?? "—"}
+              by {contact.createdByUserName ?? "—"}
             </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Updated</div>
             <div>
-              {employee.updatedAt
-                ? new Date(employee.updatedAt).toLocaleString()
+              {contact.updatedAt
+                ? new Date(contact.updatedAt).toLocaleString()
                 : "—"}
             </div>
             <div className="text-xs text-muted-foreground">
-              by {employee.updatedByUserName ?? "—"}
+              by {contact.updatedByUserName ?? "—"}
             </div>
           </div>
         </CardContent>
@@ -268,7 +268,7 @@ export default function OrgEmployeeDetailPage(props: {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            Deleting this employee is permanent.
+            Deleting this contact is permanent.
           </p>
           <div>
             <Button
@@ -283,18 +283,18 @@ export default function OrgEmployeeDetailPage(props: {
                 ) {
                   setError(null);
                   deleteMutation.mutate({
-                    id: employee.id,
+                    id: contact.id,
                     organizationId: org.id,
                   });
                 }
               }}
             >
-              {deleteMutation.isPending ? "Deleting…" : "Delete employee"}
+              {deleteMutation.isPending ? "Deleting…" : "Delete contact"}
             </Button>
           </div>
           {!isOwner ? (
             <p className="text-xs text-muted-foreground">
-              Only owners can delete employees.
+              Only owners can delete contacts.
             </p>
           ) : null}
         </CardContent>

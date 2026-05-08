@@ -14,7 +14,7 @@ export default async function OrgOverviewPage({
         <p className="mt-1 text-sm text-muted-foreground">
           Workspace for{" "}
           <span className="font-mono text-foreground">{orgSlug}</span>. Use the
-          sidebar for employees and organization settings.
+          sidebar for contacts and organization settings.
         </p>
       </div>
       <Card>
@@ -22,8 +22,8 @@ export default async function OrgOverviewPage({
           <CardTitle className="text-base">Getting started</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Add employees under{" "}
-          <strong className="text-foreground">Employees</strong>. Rename or
+          Add contacts under{" "}
+          <strong className="text-foreground">Contacts</strong>. Rename or
           delete the org under{" "}
           <strong className="text-foreground">Organization</strong> (owners
           only).
