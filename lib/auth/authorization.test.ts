@@ -5,7 +5,7 @@ import { makeOrganizationWithOwner } from "@/test/test-org";
 import { makeUser } from "@/test/test-user";
 
 import { prisma } from "../prisma";
-import { requireOwner } from "./authorization";
+import { requireMembership, requireOwner } from "./authorization";
 
 describe("requireOwner", () => {
   afterAll(async () => {
@@ -52,6 +52,45 @@ describe("requireOwner", () => {
     await expectTrpcErrorFrom(
       () => requireOwner(user.id, createId()),
       "NOT_FOUND",
+    );
+  });
+});
+
+describe("requireMembership", () => {
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
+
+  test("returns the membership when the user is the owner", async () => {
+    const { owner, org } = await makeOrganizationWithOwner("mem-owner");
+    const membership = await requireMembership(owner.id, org.id);
+    expect(membership.userId).toBe(owner.id);
+    expect(membership.organizationId).toBe(org.id);
+  });
+
+  test("returns the membership when the user is a non-owner member", async () => {
+    const { org } = await makeOrganizationWithOwner("mem-member-org");
+    const member = await makeUser("mem-member-user");
+    await prisma.userOrganization.create({
+      data: {
+        id: createId(),
+        userId: member.id,
+        organizationId: org.id,
+        role: "MEMBER",
+      },
+    });
+    const membership = await requireMembership(member.id, org.id);
+    expect(membership.userId).toBe(member.id);
+    expect(membership.organizationId).toBe(org.id);
+  });
+
+  test("throws NOT_FOUND when the user has no membership", async () => {
+    const { org } = await makeOrganizationWithOwner("mem-stranger-org");
+    const stranger = await makeUser("mem-stranger");
+    await expectTrpcErrorFrom(
+      () => requireMembership(stranger.id, org.id),
+      "NOT_FOUND",
+      "Organization not found",
     );
   });
 });

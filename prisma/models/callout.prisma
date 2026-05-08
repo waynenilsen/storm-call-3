@@ -1,0 +1,15 @@
+model Callout {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name              String
+  messageText       String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdByUserId   String?
+  updatedByUserId   String?
+  createdByUserName String?
+  updatedByUserName String?
+  createdByUser     User?        @relation("CalloutCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser     User?        @relation("CalloutUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+}

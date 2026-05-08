@@ -34,3 +34,18 @@ export async function requireOwner(userId: string, organizationId: string) {
     });
   }
 }
+
+/** Ensures the user belongs to the organization in any role; throws `NOT_FOUND` otherwise. */
+export async function requireMembership(
+  userId: string,
+  organizationId: string,
+) {
+  const membership = await getMembership({ userId, organizationId });
+  if (!membership) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Organization not found",
+    });
+  }
+  return membership;
+}

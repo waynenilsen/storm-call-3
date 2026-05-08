@@ -51,6 +51,7 @@ export function OrgAppShell({
   const navItems = [
     { href: base, label: "Overview" },
     { href: `${base}/employees`, label: "Employees" },
+    { href: `${base}/callouts`, label: "Callouts" },
     { href: `${base}/settings`, label: "Organization" },
   ] as const;
 

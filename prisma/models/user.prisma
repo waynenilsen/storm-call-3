@@ -14,6 +14,8 @@ model User {
   sessions       Session[]
   employeesCreated Employee[]        @relation("EmployeeCreatedBy")
   employeesUpdated Employee[]        @relation("EmployeeUpdatedBy")
+  calloutsCreated  Callout[]         @relation("CalloutCreatedBy")
+  calloutsUpdated  Callout[]         @relation("CalloutUpdatedBy")
 }
 
 model Organization {
@@ -25,6 +27,7 @@ model Organization {
   updatedAt   DateTime             @updatedAt
   memberships UserOrganization[]
   employees   Employee[]
+  callouts    Callout[]
   usersHavingSelectedOrganization User[] @relation("UserSelectedOrganization")
 }
 
