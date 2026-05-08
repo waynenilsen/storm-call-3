@@ -40,7 +40,11 @@ export function SignUpForm() {
         }
         setMessage(null);
         await queryClient.invalidateQueries(trpc.auth.session.queryFilter());
-        router.replace(normalizeClientNextParam(searchParams.get("next")));
+        const explicit = normalizeClientNextParam(
+          searchParams.get("next"),
+          null,
+        );
+        router.replace(explicit ?? data.redirectPath);
       },
       onError: (err) => {
         setMessage(err.message);
@@ -53,7 +57,7 @@ export function SignUpForm() {
       <CardHeader>
         <CardTitle className="text-xl">Sign up</CardTitle>
         <CardDescription>
-          Create an account to open the dashboard.
+          Create an account to join or create an organization.
         </CardDescription>
       </CardHeader>
       <CardContent>

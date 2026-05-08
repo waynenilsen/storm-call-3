@@ -33,4 +33,24 @@ describe("deleteOrganization", () => {
     });
     expect(memberships).toHaveLength(0);
   });
+
+  test("clears selectedOrganizationId on the user when that org is deleted", async () => {
+    const me = await makeUser("delete-clears-selection");
+    const org = await createOrganization({
+      name: `Selected Then Gone ${createId()}`,
+      ownerUserId: me.id,
+    });
+    await prisma.user.update({
+      where: { id: me.id },
+      data: { selectedOrganizationId: org.id },
+    });
+
+    await deleteOrganization({ id: org.id });
+
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { id: me.id },
+      select: { selectedOrganizationId: true },
+    });
+    expect(user.selectedOrganizationId).toBeNull();
+  });
 });

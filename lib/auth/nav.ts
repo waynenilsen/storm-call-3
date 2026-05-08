@@ -15,7 +15,7 @@ export function isSafeInternalNextPath(path: string) {
 
 export function normalizeClientNextParam(
   next: string | null | undefined,
-  fallback = "/dashboard",
+  fallback: string | null = "/welcome",
 ) {
   if (!next || !isSafeInternalNextPath(next)) {
     return fallback;

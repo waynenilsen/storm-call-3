@@ -14,6 +14,7 @@ export async function signIn(
       id: true,
       email: true,
       name: true,
+      selectedOrganizationId: true,
       createdAt: true,
       passwordHash: true,
     },
@@ -32,6 +33,7 @@ export async function signIn(
       id: user.id,
       email: user.email,
       name: user.name,
+      selectedOrganizationId: user.selectedOrganizationId,
       createdAt: user.createdAt,
     },
   };

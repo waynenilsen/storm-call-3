@@ -23,6 +23,8 @@ i own this file llm does not edit this file
 
 we use bun test to test stuff it runs the official built in bun test harness it is fast and efficient
 
+when running tests use `bun test:parallel` not `bun test` this improves the speed on my laptop its not needed on ci but i have a big ass m4 128gb ram so its good for high dop
+
 tests are alongside code not in a separate test folder
 
 there is a ./test dir which holds test framework code

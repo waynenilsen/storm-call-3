@@ -1,8 +1,9 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
-
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
+import { slugify } from "../slugify";
+import { allocateUniqueOrganizationSlug } from "./allocate-unique-org-slug";
 import { type CreateOrganizationInput, ORG_ROLE } from "./schemas";
 
 export async function createOrganization(
@@ -11,10 +12,15 @@ export async function createOrganization(
 ) {
   const run = async (runner: PrismaTransaction | PrismaClient) => {
     const orgId = createId();
+    const slug = await allocateUniqueOrganizationSlug(
+      slugify(params.name),
+      runner,
+    );
     const org = await runner.organization.create({
       data: {
         id: orgId,
         name: params.name,
+        slug,
         memberships: {
           create: {
             id: createId(),
@@ -26,6 +32,7 @@ export async function createOrganization(
       select: {
         id: true,
         name: true,
+        slug: true,
         createdAt: true,
         updatedAt: true,
       },

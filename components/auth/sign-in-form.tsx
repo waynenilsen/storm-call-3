@@ -39,7 +39,11 @@ export function SignInForm() {
         }
         setMessage(null);
         await queryClient.invalidateQueries(trpc.auth.session.queryFilter());
-        router.replace(normalizeClientNextParam(searchParams.get("next")));
+        const explicit = normalizeClientNextParam(
+          searchParams.get("next"),
+          null,
+        );
+        router.replace(explicit ?? data.redirectPath);
       },
       onError: (err) => {
         setMessage(err.message);

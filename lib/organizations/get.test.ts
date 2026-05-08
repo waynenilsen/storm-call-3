@@ -25,6 +25,7 @@ describe("getOrganizationForUser", () => {
     });
     expect(result?.id).toBe(org.id);
     expect(result?.role).toBe(ORG_ROLE.OWNER);
+    expect(result?.slug).toBe(org.slug);
   });
 
   test("returns null for a non-member even if the org exists", async () => {

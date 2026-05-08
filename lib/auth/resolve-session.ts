@@ -23,6 +23,7 @@ export async function getUserForSessionToken(
           id: true,
           email: true,
           name: true,
+          selectedOrganizationId: true,
           createdAt: true,
         },
       },

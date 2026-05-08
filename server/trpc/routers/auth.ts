@@ -9,6 +9,7 @@ import { signIn } from "@/lib/auth/sign-in";
 import { signOut } from "@/lib/auth/sign-out";
 import { signUp } from "@/lib/auth/sign-up";
 import { prisma } from "@/lib/prisma";
+import { resolveAuthenticatedLandingPath } from "@/lib/routing/authenticated-landing";
 import { publicProcedure, router } from "@/server/trpc/init";
 
 export const authRouter = router({
@@ -27,7 +28,14 @@ export const authRouter = router({
         result.session.token,
         result.session.expiresAt,
       );
-      return { created: true as const, user: result.user };
+      const redirectPath = await resolveAuthenticatedLandingPath(
+        result.user.id,
+      );
+      return {
+        created: true as const,
+        user: result.user,
+        redirectPath,
+      };
     }),
 
   signIn: publicProcedure
@@ -51,7 +59,14 @@ export const authRouter = router({
         result.session.token,
         result.session.expiresAt,
       );
-      return { ok: true as const, user: result.user };
+      const redirectPath = await resolveAuthenticatedLandingPath(
+        result.user.id,
+      );
+      return {
+        ok: true as const,
+        user: result.user,
+        redirectPath,
+      };
     }),
 
   signOut: publicProcedure.mutation(async ({ ctx }) => {

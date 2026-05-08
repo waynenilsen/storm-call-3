@@ -33,8 +33,9 @@ describe("signUp", () => {
 
     const stored = await prisma.user.findUniqueOrThrow({
       where: { id: user.id },
-      select: { passwordHash: true },
+      select: { passwordHash: true, selectedOrganizationId: true },
     });
+    expect(stored.selectedOrganizationId).toBeNull();
     expect(stored.passwordHash).not.toContain("correct");
     await expect(
       verifyPassword("correct horse battery staple", stored.passwordHash),

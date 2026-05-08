@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useId, useState } from "react";
 
@@ -13,19 +12,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ORG_ROLE } from "@/lib/organizations/schemas";
 import { useTRPC } from "@/lib/trpc/client";
 
-export default function OrganizationDetailPage(props: {
-  params: Promise<{ id: string }>;
+export default function OrgSettingsPage(props: {
+  params: Promise<{ orgSlug: string }>;
 }) {
-  const { id } = use(props.params);
+  const { orgSlug } = use(props.params);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
   const formId = useId();
-
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const orgQuery = useQuery(trpc.organizations.get.queryOptions({ id }));
+  const orgQuery = useQuery(
+    trpc.organizations.getBySlug.queryOptions({ slug: orgSlug }),
+  );
 
   useEffect(() => {
     if (orgQuery.data) {
@@ -35,16 +35,19 @@ export default function OrganizationDetailPage(props: {
 
   const updateMutation = useMutation(
     trpc.organizations.update.mutationOptions({
-      onSuccess: async () => {
+      onSuccess: async (updated) => {
         setError(null);
         await Promise.all([
-          queryClient.invalidateQueries(trpc.organizations.get.queryFilter()),
+          queryClient.invalidateQueries(
+            trpc.organizations.getBySlug.queryFilter({ slug: orgSlug }),
+          ),
           queryClient.invalidateQueries(trpc.organizations.list.queryFilter()),
         ]);
+        if (updated.slug !== orgSlug) {
+          router.replace(`/o/${updated.slug}/settings`);
+        }
       },
-      onError: (err) => {
-        setError(err.message);
-      },
+      onError: (err) => setError(err.message),
     }),
   );
 
@@ -54,11 +57,9 @@ export default function OrganizationDetailPage(props: {
         await queryClient.invalidateQueries(
           trpc.organizations.list.queryFilter(),
         );
-        router.replace("/dashboard/organizations");
+        router.replace("/welcome");
       },
-      onError: (err) => {
-        setError(err.message);
-      },
+      onError: (err) => setError(err.message),
     }),
   );
 
@@ -73,17 +74,9 @@ export default function OrganizationDetailPage(props: {
 
   if (orgQuery.isError || !orgQuery.data) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-destructive" role="alert">
-          {orgQuery.error?.message ?? "Organization not found."}
-        </p>
-        <Link
-          href="/dashboard/organizations"
-          className="text-sm underline-offset-4 hover:underline"
-        >
-          Back to organizations
-        </Link>
-      </div>
+      <p className="text-sm text-destructive">
+        {orgQuery.error?.message ?? "Organization not found."}
+      </p>
     );
   }
 
@@ -98,19 +91,12 @@ export default function OrganizationDetailPage(props: {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-baseline justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-medium">{org.name}</h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Your role: {org.role ?? "—"}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/organizations"
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-        >
-          ← All organizations
-        </Link>
+      <div>
+        <h1 className="text-lg font-medium">Organization settings</h1>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Slug: <span className="font-mono">{org.slug}</span> · Your role:{" "}
+          {org.role ?? "—"}
+        </p>
       </div>
 
       <Card>
@@ -158,7 +144,8 @@ export default function OrganizationDetailPage(props: {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
-            Deleting this organization is permanent and removes all memberships.
+            Deleting this organization is permanent and removes memberships and
+            related data.
           </p>
           <div>
             <Button

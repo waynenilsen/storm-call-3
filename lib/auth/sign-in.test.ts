@@ -39,6 +39,7 @@ describe("signIn", () => {
     if (result.ok) {
       expect(result.user).not.toHaveProperty("passwordHash");
       expect(result.user.createdAt).toBeInstanceOf(Date);
+      expect(result.user.selectedOrganizationId).toBeNull();
     }
   });
 

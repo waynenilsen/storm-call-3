@@ -4,6 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { makeUser } from "@/test/test-user";
 
 import { prisma } from "../prisma";
+import { slugify } from "../slugify";
 import { createOrganization } from "./create";
 import { ORG_ROLE } from "./schemas";
 
@@ -14,14 +15,15 @@ describe("createOrganization", () => {
 
   test("creates org and OWNER membership for the creator", async () => {
     const user = await makeUser("create-org");
-    const slug = createId();
+    const token = createId();
     const org = await createOrganization({
-      name: `Acme ${slug}`,
+      name: `Acme ${token}`,
       ownerUserId: user.id,
     });
 
     expect(org.id.length).toBeGreaterThan(0);
-    expect(org.name).toBe(`Acme ${slug}`);
+    expect(org.name).toBe(`Acme ${token}`);
+    expect(org.slug).toBe(slugify(`Acme ${token}`));
     expect(org.role).toBe(ORG_ROLE.OWNER);
 
     const membership = await prisma.userOrganization.findUniqueOrThrow({
@@ -38,15 +40,17 @@ describe("createOrganization", () => {
 
   test("trims and stores org name as provided after schema parse", async () => {
     const user = await makeUser("trim-org");
+    const token = createId().toLowerCase();
     const org = await createOrganization({
-      name: "Padded Inc",
+      name: `Padded Inc ${token}`,
       ownerUserId: user.id,
     });
     const stored = await prisma.organization.findUniqueOrThrow({
       where: { id: org.id },
-      select: { name: true },
+      select: { name: true, slug: true },
     });
-    expect(stored.name).toBe("Padded Inc");
+    expect(stored.name).toBe(`Padded Inc ${token}`);
+    expect(stored.slug).toBe(slugify(`Padded Inc ${token}`));
   });
 
   test("two users may each own their own organization independently", async () => {
@@ -68,5 +72,37 @@ describe("createOrganization", () => {
       },
     });
     expect(aHasB).toBeNull();
+  });
+
+  test("allocates incremented slug when two names collide after slugify", async () => {
+    const owner = await makeUser("slug-dup-owner");
+    const suffix = createId().toLowerCase();
+    const first = await createOrganization({
+      name: `Twin Co! ${suffix}`,
+      ownerUserId: owner.id,
+    });
+    const second = await createOrganization({
+      name: `twin  co? ${suffix}`,
+      ownerUserId: owner.id,
+    });
+    const baseSlug = slugify(`Twin Co! ${suffix}`);
+    expect(first.slug).toBe(baseSlug);
+    expect(second.slug).toBe(`${baseSlug}-2`);
+    expect(first.id).not.toBe(second.id);
+  });
+
+  test("uses fallback base slug when name has no alphanumeric content", async () => {
+    const owner = await makeUser("slug-emoji-owner");
+    const alpha = await createOrganization({
+      name: "⚡⚡⚡",
+      ownerUserId: owner.id,
+    });
+    const beta = await createOrganization({
+      name: "***",
+      ownerUserId: owner.id,
+    });
+    expect(alpha.slug).toMatch(/^organization(-\d+)?$/);
+    expect(beta.slug).toMatch(/^organization(-\d+)?$/);
+    expect(alpha.slug).not.toBe(beta.slug);
   });
 });

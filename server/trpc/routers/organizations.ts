@@ -4,11 +4,13 @@ import { requireOwner } from "@/lib/auth/authorization";
 import { createOrganization } from "@/lib/organizations/create";
 import { deleteOrganization } from "@/lib/organizations/delete";
 import { getOrganizationForUser } from "@/lib/organizations/get";
+import { getOrganizationForUserBySlug } from "@/lib/organizations/get-by-slug";
 import { listOrganizationsForUser } from "@/lib/organizations/list";
 import {
   createOrganizationInputSchema,
   listOrganizationsInputSchema,
   organizationByIdInputSchema,
+  organizationBySlugInputSchema,
   updateOrganizationInputSchema,
 } from "@/lib/organizations/schemas";
 import { updateOrganization } from "@/lib/organizations/update";
@@ -25,6 +27,22 @@ export const organizationsRouter = router({
       const org = await getOrganizationForUser({
         organizationId: input.id,
         userId: ctx.user.id,
+      });
+      if (!org) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Organization not found",
+        });
+      }
+      return org;
+    }),
+
+  getBySlug: protectedProcedure
+    .input(organizationBySlugInputSchema)
+    .query(async ({ ctx, input }) => {
+      const org = await getOrganizationForUserBySlug({
+        userId: ctx.user.id,
+        slug: input.slug,
       });
       if (!org) {
         throw new TRPCError({

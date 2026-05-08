@@ -6,6 +6,8 @@ model User {
   adminRole      String?
   employeeId     String?
   employee       Employee?            @relation("UserEmployeeLink", fields: [employeeId], references: [id], onDelete: SetNull)
+  selectedOrganizationId String?
+  selectedOrganization Organization?   @relation("UserSelectedOrganization", fields: [selectedOrganizationId], references: [id], onDelete: SetNull)
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   memberships    UserOrganization[]
@@ -17,10 +19,12 @@ model User {
 model Organization {
   id          String               @id @default(cuid())
   name        String
+  slug        String               @unique
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   memberships UserOrganization[]
   employees   Employee[]
+  usersHavingSelectedOrganization User[] @relation("UserSelectedOrganization")
 }
 
 model UserOrganization {

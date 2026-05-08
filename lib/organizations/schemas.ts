@@ -34,6 +34,15 @@ export const organizationByIdInputSchema = z.object({
 });
 export type OrganizationByIdInput = z.infer<typeof organizationByIdInputSchema>;
 
+export const organizationSlugParamSchema = z.string().trim().min(1).max(120);
+
+export const organizationBySlugInputSchema = z.object({
+  slug: organizationSlugParamSchema,
+});
+export type OrganizationBySlugInput = z.infer<
+  typeof organizationBySlugInputSchema
+>;
+
 export const listOrganizationsInputSchema = z.object({
   search: z.string().trim().max(200).optional(),
   limit: z.number().int().min(1).max(100).default(50),

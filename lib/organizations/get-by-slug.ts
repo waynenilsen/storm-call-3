@@ -4,13 +4,13 @@ import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import type { OrgRole } from "./schemas";
 
-export async function getOrganizationForUser(
-  params: { organizationId: string; userId: string },
+export async function getOrganizationForUserBySlug(
+  params: { userId: string; slug: string },
   db: PrismaTransaction | PrismaClient = prisma,
 ) {
   const row = await db.organization.findFirst({
     where: {
-      id: params.organizationId,
+      slug: params.slug,
       memberships: { some: { userId: params.userId } },
     },
     select: {

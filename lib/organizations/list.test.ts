@@ -37,6 +37,7 @@ describe("listOrganizationsForUser", () => {
     expect(ids).toEqual([a.id, b.id].sort());
     for (const row of rows) {
       expect(row.role).toBe(ORG_ROLE.OWNER);
+      expect(row.slug.length).toBeGreaterThan(0);
     }
   });
 

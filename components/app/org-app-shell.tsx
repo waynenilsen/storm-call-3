@@ -28,22 +28,30 @@ type SessionUser = NonNullable<
   inferRouterOutputs<AppRouter>["auth"]["session"]
 >;
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/organizations", label: "Organizations" },
-] as const;
+type OrgBrief = Pick<
+  inferRouterOutputs<AppRouter>["organizations"]["getBySlug"],
+  "id" | "name" | "slug"
+>;
 
-export function DashboardShell({
+export function OrgAppShell({
   user,
+  org,
   children,
 }: {
   user: SessionUser;
+  org: OrgBrief;
   children: React.ReactNode;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
+  const base = `/o/${org.slug}`;
+  const navItems = [
+    { href: base, label: "Overview" },
+    { href: `${base}/employees`, label: "Employees" },
+    { href: `${base}/settings`, label: "Organization" },
+  ] as const;
 
   const signOutMutation = useMutation(
     trpc.auth.signOut.mutationOptions({
@@ -60,19 +68,20 @@ export function DashboardShell({
         <SidebarHeader className="border-b border-sidebar-border px-2 py-3">
           <SidebarMenuButton
             className="px-2 text-left font-semibold"
-            render={<Link href="/dashboard" />}
+            render={<Link href={base} />}
           >
-            Placeholder app
+            {org.name}
           </SidebarMenuButton>
+          <p className="px-2 text-xs text-muted-foreground">{org.slug}</p>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {NAV_ITEMS.map((item) => {
+                {navItems.map((item) => {
                   const active =
-                    item.href === "/dashboard"
+                    item.href === base
                       ? pathname === item.href
                       : pathname === item.href ||
                         pathname.startsWith(`${item.href}/`);
@@ -110,7 +119,7 @@ export function DashboardShell({
       <SidebarInset className="flex min-h-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
-          <span className="text-sm text-muted-foreground">Dashboard</span>
+          <span className="text-sm text-muted-foreground">{org.name}</span>
         </header>
         <main className="flex min-h-0 flex-1 flex-col p-6">{children}</main>
       </SidebarInset>

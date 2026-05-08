@@ -20,6 +20,7 @@ export async function listOrganizationsForUser(
     select: {
       id: true,
       name: true,
+      slug: true,
       createdAt: true,
       updatedAt: true,
       memberships: {
@@ -36,6 +37,7 @@ export async function listOrganizationsForUser(
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
+    slug: row.slug,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     role: (row.memberships[0]?.role ?? null) as OrgRole | null,
