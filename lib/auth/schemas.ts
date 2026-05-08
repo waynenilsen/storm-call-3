@@ -39,3 +39,20 @@ export const signOutInputSchema = z.object({
 });
 
 export type SignOutInput = z.infer<typeof signOutInputSchema>;
+
+export const requestPasswordResetInputSchema = z.object({
+  email: emailSchema,
+});
+
+export type RequestPasswordResetInput = z.infer<
+  typeof requestPasswordResetInputSchema
+>;
+
+export const completePasswordResetInputSchema = z.object({
+  token: z.string().min(1).max(200),
+  password: signUpPasswordSchema,
+});
+
+export type CompletePasswordResetInput = z.infer<
+  typeof completePasswordResetInputSchema
+>;

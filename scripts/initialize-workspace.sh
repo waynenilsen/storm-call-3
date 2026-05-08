@@ -118,6 +118,7 @@ ensure_env_kv MAILHOG_SMTP_PORT 1025
 ensure_env_kv MAILHOG_UI_PORT 8025
 ensure_env_kv SMTP_HOST localhost
 ensure_env_kv SMTP_PORT 1025
+ensure_env_kv EMAIL_FROM '"Storm Call <no-reply@stormcall.local>"'
 sed_inplace "s/^MAILHOG_SMTP_PORT=.*/MAILHOG_SMTP_PORT=$MAILHOG_SMTP_PORT/" .env
 sed_inplace "s/^MAILHOG_UI_PORT=.*/MAILHOG_UI_PORT=$MAILHOG_UI_PORT/" .env
 sed_inplace "s/^SMTP_PORT=.*/SMTP_PORT=$MAILHOG_SMTP_PORT/" .env
@@ -147,6 +148,8 @@ while [ "$PORT" = "$DATABASE_PORT" ] || [ "$PORT" = "$MINIO_API_PORT" ] || [ "$P
   PORT=$(find_free_port 50000 60000 50)
 done
 sed_inplace "s/^PORT=.*/PORT=$PORT/" .env
+ensure_env_kv APP_URL "http://localhost:$PORT"
+sed_inplace "s|^APP_URL=.*|APP_URL=http://localhost:$PORT|" .env
 echo "Web app port set to $PORT"
 
 echo "Running database migrations..."
