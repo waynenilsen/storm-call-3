@@ -1,20 +1,20 @@
 model Contact {
-  id                String    @id @default(cuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id                   String       @id @default(cuid())
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   /// Single display string rather than structured given/middle/family parts—real-world name
   /// variants are too messy to normalize reliably; one field is sufficient for how we use it.
-  name              String?
-  email             String?
+  name                 String?
+  email                String?
   /// Always stored in E.164 (e.g. +15551234567), not local or display-only formats.
-  phone             String?
-  createdAt         DateTime? @default(now())
-  updatedAt         DateTime? @updatedAt
-  createdByUserId   String?
-  updatedByUserId   String?
-  createdByUserName String?
-  updatedByUserName String?
-  createdByUser     User?     @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  updatedByUser     User?     @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-  usersWithThisProfile User[] @relation("UserContactLink")
+  phone                String?
+  createdAt            DateTime?    @default(now())
+  updatedAt            DateTime?    @updatedAt
+  createdByUserId      String?
+  updatedByUserId      String?
+  createdByUserName    String?
+  updatedByUserName    String?
+  createdByUser        User?        @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser        User?        @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  usersWithThisProfile User[]       @relation("UserContactLink")
 }

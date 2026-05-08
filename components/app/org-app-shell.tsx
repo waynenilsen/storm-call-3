@@ -52,6 +52,7 @@ export function OrgAppShell({
     { href: base, label: "Overview" },
     { href: `${base}/contacts`, label: "Contacts" },
     { href: `${base}/callouts`, label: "Callouts" },
+    { href: `${base}/equipment`, label: "Equipment" },
     { href: `${base}/settings`, label: "Organization" },
   ] as const;
 

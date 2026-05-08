@@ -1,0 +1,21 @@
+model Equipment {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyCode       String?
+  type              String?
+  subtype           String?
+  mechanicalStatus  String?
+  toolStatus        String?
+  notes             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdByUserId   String?
+  updatedByUserId   String?
+  createdByUserName String?
+  updatedByUserName String?
+  createdByUser     User?        @relation("EquipmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser     User?        @relation("EquipmentUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
