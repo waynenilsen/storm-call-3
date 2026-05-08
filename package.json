@@ -16,6 +16,8 @@
     "get-db-port": "dotenv -- node -e \"console.log(process.env.DATABASE_PORT ?? '')\"",
     "get-minio-api-port": "dotenv -- node -e \"console.log(process.env.MINIO_API_PORT ?? '')\"",
     "get-minio-console-port": "dotenv -- node -e \"console.log(process.env.MINIO_CONSOLE_PORT ?? '')\"",
+    "get-mailhog-smtp-port": "dotenv -- node -e \"console.log(process.env.MAILHOG_SMTP_PORT ?? '')\"",
+    "get-mailhog-ui-port": "dotenv -- node -e \"console.log(process.env.MAILHOG_UI_PORT ?? '')\"",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
