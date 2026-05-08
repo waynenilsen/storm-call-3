@@ -61,6 +61,39 @@ describe("listEmployeesInOrganization", () => {
     expect(byEmail.map((r) => r.id)).toEqual([target.id]);
   });
 
+  test("matches phone via digits stripped from a formatted query", async () => {
+    const slug = createId();
+    const { org, owner } = await makeEmployeeWithOrg("emp-list-phone");
+    const target = await createEmployee({
+      organizationId: org.id,
+      actingUserId: owner.id,
+      name: `Phone Match ${slug}`,
+      phone: "(415) 555-0142",
+    });
+    await createEmployee({
+      organizationId: org.id,
+      actingUserId: owner.id,
+      name: `Other Phone ${slug}`,
+      phone: "+12125550000",
+    });
+
+    const formatted = await listEmployeesInOrganization(
+      listEmployeesInputSchema.parse({
+        organizationId: org.id,
+        search: "(415) 555-0142",
+      }),
+    );
+    expect(formatted.map((r) => r.id)).toEqual([target.id]);
+
+    const partialDigits = await listEmployeesInOrganization(
+      listEmployeesInputSchema.parse({
+        organizationId: org.id,
+        search: "5550142",
+      }),
+    );
+    expect(partialDigits.map((r) => r.id)).toEqual([target.id]);
+  });
+
   test("respects limit and offset for pagination", async () => {
     const { org, owner } = await makeEmployeeWithOrg("emp-list-page");
     for (let i = 0; i < 3; i += 1) {
