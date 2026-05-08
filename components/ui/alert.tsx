@@ -4,13 +4,18 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "group/alert relative grid w-full gap-0.5 rounded-lg border px-2.5 py-2 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
+  "group/alert relative grid w-full gap-0.5 rounded-lg border px-3 py-2.5 text-left text-sm shadow-xs has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default: "border-border/70 bg-card text-card-foreground",
+        info: "border-primary/20 bg-primary/5 text-foreground *:[svg]:text-primary *:data-[slot=alert-description]:text-foreground/80 dark:bg-primary/10",
         destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+          "border-destructive/20 bg-destructive/5 text-destructive *:data-[slot=alert-description]:text-destructive/85 *:[svg]:text-current dark:bg-destructive/10",
+        success:
+          "border-success/25 bg-success/5 text-success *:data-[slot=alert-description]:text-success/85 *:[svg]:text-current dark:bg-success/10",
+        warning:
+          "border-warning/30 bg-warning/10 text-warning-foreground *:data-[slot=alert-description]:text-warning-foreground/80 *:[svg]:text-warning-foreground dark:text-warning dark:*:[svg]:text-warning dark:*:data-[slot=alert-description]:text-warning/85",
       },
     },
     defaultVariants: {
