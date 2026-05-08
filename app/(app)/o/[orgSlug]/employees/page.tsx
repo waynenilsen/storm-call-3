@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import Link from "next/link";
-import { use, useId, useState } from "react";
+import { use, useEffect, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,15 @@ export default function OrgEmployeesPage(props: {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce keystrokes: trigram GIN keeps the query fast, but no need to
+  // hit the server on every character.
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => clearTimeout(id);
+  }, [search]);
 
   const orgQuery = useQuery(
     trpc.organizations.getBySlug.queryOptions({ slug: orgSlug }),
@@ -44,7 +53,12 @@ export default function OrgEmployeesPage(props: {
   const employeesQuery = useQuery(
     trpc.employees.list.queryOptions(
       orgQuery.data
-        ? { organizationId: orgQuery.data.id, limit: 50, offset: 0 }
+        ? {
+            organizationId: orgQuery.data.id,
+            limit: 50,
+            offset: 0,
+            ...(debouncedSearch ? { search: debouncedSearch } : {}),
+          }
         : skipToken,
     ),
   );
@@ -173,8 +187,18 @@ export default function OrgEmployeesPage(props: {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3 sm:flex-row">
           <CardTitle className="text-base">Directory</CardTitle>
+          <Input
+            id={`${formId}-search`}
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            maxLength={200}
+            placeholder="Search name, email, or phone…"
+            className="max-w-xs"
+            aria-label="Search employees"
+          />
         </CardHeader>
         <CardContent>
           {employeesQuery.isPending ? (
@@ -209,6 +233,10 @@ export default function OrgEmployeesPage(props: {
                 ))}
               </TableBody>
             </Table>
+          ) : debouncedSearch ? (
+            <p className="text-sm text-muted-foreground">
+              No employees match “{debouncedSearch}”.
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground">No employees yet.</p>
           )}

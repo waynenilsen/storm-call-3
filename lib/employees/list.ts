@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
@@ -10,20 +10,23 @@ export async function listEmployeesInOrganization(
   db: PrismaTransaction | PrismaClient = prisma,
 ) {
   const search = filters.search?.trim();
-  const searchFilter =
-    search === undefined || search.length === 0
-      ? {}
-      : {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { email: { contains: search, mode: "insensitive" as const } },
-          ],
-        };
+  const or: Prisma.EmployeeWhereInput[] = [];
+  if (search && search.length > 0) {
+    or.push({ name: { contains: search, mode: "insensitive" } });
+    or.push({ email: { contains: search, mode: "insensitive" } });
+    // Phone is stored E.164 like +15551234567; match a digit-only needle so
+    // a query of "(555) 123-4567" hits it. Sub-3-digit needles fall back to
+    // seq scan via the trigram index, so we skip them.
+    const digits = search.replace(/\D+/g, "");
+    if (digits.length >= 3) {
+      or.push({ phone: { contains: digits } });
+    }
+  }
 
   return db.employee.findMany({
     where: {
       organizationId: filters.organizationId,
-      ...searchFilter,
+      ...(or.length > 0 ? { OR: or } : {}),
     },
     select: employeeRowSelect,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
