@@ -21,6 +21,7 @@ export async function createOrganization(
         id: orgId,
         name: params.name,
         slug,
+        url: params.url ?? null,
         memberships: {
           create: {
             id: createId(),
@@ -33,6 +34,7 @@ export async function createOrganization(
         id: true,
         name: true,
         slug: true,
+        url: true,
         createdAt: true,
         updatedAt: true,
       },

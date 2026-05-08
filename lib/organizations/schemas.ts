@@ -14,8 +14,16 @@ export const organizationNameSchema = z.string().trim().min(1).max(200);
 
 export const organizationIdSchema = z.string().min(1).max(64);
 
+export const organizationUrlSchema = z
+  .string()
+  .trim()
+  .url()
+  .max(2048)
+  .nullish();
+
 export const createOrganizationInputSchema = z.object({
   name: organizationNameSchema,
+  url: organizationUrlSchema,
 });
 export type CreateOrganizationInput = z.infer<
   typeof createOrganizationInputSchema
@@ -24,6 +32,7 @@ export type CreateOrganizationInput = z.infer<
 export const updateOrganizationInputSchema = z.object({
   id: organizationIdSchema,
   name: organizationNameSchema,
+  url: organizationUrlSchema,
 });
 export type UpdateOrganizationInput = z.infer<
   typeof updateOrganizationInputSchema

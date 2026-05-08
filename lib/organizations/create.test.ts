@@ -53,6 +53,30 @@ describe("createOrganization", () => {
     expect(stored.slug).toBe(slugify(`Padded Inc ${token}`));
   });
 
+  test("creates org with url when provided", async () => {
+    const user = await makeUser("create-org-url");
+    const org = await createOrganization({
+      name: `WithUrl ${createId()}`,
+      url: "https://example.com",
+      ownerUserId: user.id,
+    });
+    expect(org.url).toBe("https://example.com");
+    const stored = await prisma.organization.findUniqueOrThrow({
+      where: { id: org.id },
+      select: { url: true },
+    });
+    expect(stored.url).toBe("https://example.com");
+  });
+
+  test("creates org with null url when omitted", async () => {
+    const user = await makeUser("create-org-no-url");
+    const org = await createOrganization({
+      name: `NoUrl ${createId()}`,
+      ownerUserId: user.id,
+    });
+    expect(org.url).toBeNull();
+  });
+
   test("two users may each own their own organization independently", async () => {
     const a = await makeUser("solo-a");
     const b = await makeUser("solo-b");

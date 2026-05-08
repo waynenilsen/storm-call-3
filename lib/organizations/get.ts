@@ -17,6 +17,7 @@ export async function getOrganizationForUser(
       id: true,
       name: true,
       slug: true,
+      url: true,
       createdAt: true,
       updatedAt: true,
       memberships: {
@@ -33,6 +34,7 @@ export async function getOrganizationForUser(
     id: row.id,
     name: row.name,
     slug: row.slug,
+    url: row.url,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     role: (row.memberships[0]?.role ?? null) as OrgRole | null,
