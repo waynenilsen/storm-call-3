@@ -52,6 +52,7 @@ export function OrgAppShell({
     { href: base, label: "Overview" },
     { href: `${base}/conversations`, label: "Conversations" },
     { href: `${base}/contacts`, label: "Contacts" },
+    { href: `${base}/employees`, label: "Employees" },
     { href: `${base}/callouts`, label: "Callouts" },
     { href: `${base}/equipment`, label: "Equipment" },
     { href: `${base}/activity`, label: "Activity" },
