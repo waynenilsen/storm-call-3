@@ -83,3 +83,9 @@ be flexible, lean on nullable fields fairly often
 lean on type infenence - mostly don't be explicit about return types - mostly lean on existing types from typegen from zod and/or prisma
 
 hoist zod schemas and zod inferred types to a separate file whenever possible see ./lib/auth for example - this helps keep frontend and backend code separated
+
+trpc layer must take out the tx and pass it down through the layers, this helps declutter the code base from opening txs all over the place
+
+on any write trpc layer should be taking out the db transaction and passing it down for ease of extendability even if its just one record impacted or one stmt
+
+tests do not need to take out transactions the test top level can pass down prisma
