@@ -14,11 +14,16 @@ export async function updateOrganization(
   });
   return db.organization.update({
     where: { id: params.id },
-    data: { name: params.name, slug },
+    data: {
+      name: params.name,
+      slug,
+      ...(params.url !== undefined ? { url: params.url } : {}),
+    },
     select: {
       id: true,
       name: true,
       slug: true,
+      url: true,
       createdAt: true,
       updatedAt: true,
     },

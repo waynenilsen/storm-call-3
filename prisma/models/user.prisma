@@ -20,6 +20,7 @@ model Organization {
   id          String               @id @default(cuid())
   name        String
   slug        String               @unique
+  url         String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   memberships UserOrganization[]

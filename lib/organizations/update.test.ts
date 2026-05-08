@@ -55,4 +55,52 @@ describe("updateOrganization", () => {
     expect(refreshed.slug).toBe(`${expectedBase}-2`);
     expect(slugify(refreshed.name)).toBe(expectedBase);
   });
+
+  test("updates url when provided", async () => {
+    const me = await makeUser("update-url-set");
+    const org = await createOrganization({
+      name: `Org ${createId()}`,
+      ownerUserId: me.id,
+    });
+    const updated = await updateOrganization({
+      id: org.id,
+      name: org.name,
+      url: "https://acme.test",
+    });
+    expect(updated.url).toBe("https://acme.test");
+    const stored = await prisma.organization.findUniqueOrThrow({
+      where: { id: org.id },
+      select: { url: true },
+    });
+    expect(stored.url).toBe("https://acme.test");
+  });
+
+  test("clears url when explicitly set to null", async () => {
+    const me = await makeUser("update-url-clear");
+    const org = await createOrganization({
+      name: `Org ${createId()}`,
+      url: "https://existing.test",
+      ownerUserId: me.id,
+    });
+    const updated = await updateOrganization({
+      id: org.id,
+      name: org.name,
+      url: null,
+    });
+    expect(updated.url).toBeNull();
+  });
+
+  test("leaves url untouched when key is omitted", async () => {
+    const me = await makeUser("update-url-omit");
+    const org = await createOrganization({
+      name: `Before ${createId()}`,
+      url: "https://keep.test",
+      ownerUserId: me.id,
+    });
+    const updated = await updateOrganization({
+      id: org.id,
+      name: `After ${createId()}`,
+    });
+    expect(updated.url).toBe("https://keep.test");
+  });
 });
