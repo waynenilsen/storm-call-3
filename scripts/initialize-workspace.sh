@@ -91,6 +91,29 @@ sed_inplace "s/^MINIO_API_PORT=.*/MINIO_API_PORT=$MINIO_API_PORT/" .env
 sed_inplace "s/^MINIO_CONSOLE_PORT=.*/MINIO_CONSOLE_PORT=$MINIO_CONSOLE_PORT/" .env
 sed_inplace "s|^MINIO_ENDPOINT=.*|MINIO_ENDPOINT=http://localhost:$MINIO_API_PORT|" .env
 
+# MailHog host ports — same convention as MinIO. SMTP sink for dev/test, no production use.
+# No readiness probe: mailhog starts fast, no other init step depends on it, and the image
+# ships no shell tools to probe with cleanly.
+MAILHOG_SMTP_PORT=$(find_free_port 50000 60000 50)
+while [ "$MAILHOG_SMTP_PORT" = "$DATABASE_PORT" ] || [ "$MAILHOG_SMTP_PORT" = "$MINIO_API_PORT" ] || [ "$MAILHOG_SMTP_PORT" = "$MINIO_CONSOLE_PORT" ]; do
+  MAILHOG_SMTP_PORT=$(find_free_port 50000 60000 50)
+done
+MAILHOG_UI_PORT=$(find_free_port 50000 60000 50)
+while [ "$MAILHOG_UI_PORT" = "$DATABASE_PORT" ] || [ "$MAILHOG_UI_PORT" = "$MINIO_API_PORT" ] || [ "$MAILHOG_UI_PORT" = "$MINIO_CONSOLE_PORT" ] || [ "$MAILHOG_UI_PORT" = "$MAILHOG_SMTP_PORT" ]; do
+  MAILHOG_UI_PORT=$(find_free_port 50000 60000 50)
+done
+sed_inplace "s|\"MAILHOG_SMTP_PORT:1025\"|\"${MAILHOG_SMTP_PORT}:1025\"|g" docker-compose.yml
+sed_inplace "s|\"[0-9][0-9]*:1025\"|\"${MAILHOG_SMTP_PORT}:1025\"|g" docker-compose.yml
+sed_inplace "s|\"MAILHOG_UI_PORT:8025\"|\"${MAILHOG_UI_PORT}:8025\"|g" docker-compose.yml
+sed_inplace "s|\"[0-9][0-9]*:8025\"|\"${MAILHOG_UI_PORT}:8025\"|g" docker-compose.yml
+ensure_env_kv MAILHOG_SMTP_PORT 1025
+ensure_env_kv MAILHOG_UI_PORT 8025
+ensure_env_kv SMTP_HOST localhost
+ensure_env_kv SMTP_PORT 1025
+sed_inplace "s/^MAILHOG_SMTP_PORT=.*/MAILHOG_SMTP_PORT=$MAILHOG_SMTP_PORT/" .env
+sed_inplace "s/^MAILHOG_UI_PORT=.*/MAILHOG_UI_PORT=$MAILHOG_UI_PORT/" .env
+sed_inplace "s/^SMTP_PORT=.*/SMTP_PORT=$MAILHOG_SMTP_PORT/" .env
+
 docker compose down --remove-orphans
 docker compose up -d
 echo "docker-compose.yml generated and containers started."
@@ -112,7 +135,7 @@ echo "Buckets ready: public, private"
 # Port for web app, also picked from the 50000-60000 range. Re-rolls if it
 # collides with any port we've already assigned for this workspace.
 PORT=$(find_free_port 50000 60000 50)
-while [ "$PORT" = "$DATABASE_PORT" ] || [ "$PORT" = "$MINIO_API_PORT" ] || [ "$PORT" = "$MINIO_CONSOLE_PORT" ]; do
+while [ "$PORT" = "$DATABASE_PORT" ] || [ "$PORT" = "$MINIO_API_PORT" ] || [ "$PORT" = "$MINIO_CONSOLE_PORT" ] || [ "$PORT" = "$MAILHOG_SMTP_PORT" ] || [ "$PORT" = "$MAILHOG_UI_PORT" ]; do
   PORT=$(find_free_port 50000 60000 50)
 done
 sed_inplace "s/^PORT=.*/PORT=$PORT/" .env
@@ -130,4 +153,6 @@ echo "Web app port: $PORT"
 echo "Database port: $DATABASE_PORT"
 echo "MinIO API port: $MINIO_API_PORT"
 echo "MinIO Console port: $MINIO_CONSOLE_PORT"
+echo "MailHog SMTP port: $MAILHOG_SMTP_PORT"
+echo "MailHog UI port: $MAILHOG_UI_PORT"
 echo "--------------------------------"

@@ -19,3 +19,10 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+
+  # mailhog — MAILHOG_SMTP_PORT / MAILHOG_UI_PORT in ports are rewritten by scripts/initialize-workspace.sh
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "MAILHOG_SMTP_PORT:1025"
+      - "MAILHOG_UI_PORT:8025"
