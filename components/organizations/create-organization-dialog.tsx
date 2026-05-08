@@ -22,16 +22,28 @@ import { useTRPC } from "@/lib/trpc/client";
 export function CreateOrganizationDialog({
   triggerLabel = "Create another organization",
   triggerVariant = "outline",
+  open: openProp,
+  onOpenChange,
+  showTrigger = true,
 }: {
   triggerLabel?: string;
   triggerVariant?: React.ComponentProps<typeof Button>["variant"];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
   const formId = useId();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : internalOpen;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -65,13 +77,15 @@ export function CreateOrganizationDialog({
         }
       }}
     >
-      <DialogTrigger
-        render={
-          <Button type="button" variant={triggerVariant} className="w-full" />
-        }
-      >
-        {triggerLabel}
-      </DialogTrigger>
+      {showTrigger ? (
+        <DialogTrigger
+          render={
+            <Button type="button" variant={triggerVariant} className="w-full" />
+          }
+        >
+          {triggerLabel}
+        </DialogTrigger>
+      ) : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create a new organization</DialogTitle>
