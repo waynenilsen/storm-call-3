@@ -5,7 +5,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { CreateOrganizationDialog } from "@/components/organizations/create-organization-dialog";
+import { OrgSwitcher } from "@/components/app/org-switcher";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -66,14 +66,12 @@ export function OrgAppShell({
   return (
     <SidebarProvider className="flex min-h-0 flex-1">
       <Sidebar>
-        <SidebarHeader className="border-b border-sidebar-border px-2 py-3">
-          <SidebarMenuButton
-            className="px-2 text-left font-semibold"
-            render={<Link href={base} />}
-          >
-            {org.name}
-          </SidebarMenuButton>
-          <p className="px-2 text-xs text-muted-foreground">{org.slug}</p>
+        <SidebarHeader className="border-b border-sidebar-border p-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <OrgSwitcher currentOrg={org} />
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -102,9 +100,6 @@ export function OrgAppShell({
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2">
-          <div className="mb-2">
-            <CreateOrganizationDialog />
-          </div>
           <div className="mb-2 px-2 text-xs text-muted-foreground">
             <div className="font-medium text-foreground">{user.name}</div>
             <div className="truncate">{user.email}</div>
