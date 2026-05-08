@@ -5,6 +5,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { CreateOrganizationDialog } from "@/components/organizations/create-organization-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -101,6 +102,9 @@ export function OrgAppShell({
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2">
+          <div className="mb-2">
+            <CreateOrganizationDialog />
+          </div>
           <div className="mb-2 px-2 text-xs text-muted-foreground">
             <div className="font-medium text-foreground">{user.name}</div>
             <div className="truncate">{user.email}</div>
