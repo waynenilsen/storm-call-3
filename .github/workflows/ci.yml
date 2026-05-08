@@ -43,6 +43,13 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      S3_ENDPOINT: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_PUBLIC_BUCKET: public
+      S3_PRIVATE_BUCKET: private
+      S3_FORCE_PATH_STYLE: "true"
     steps:
       - uses: actions/checkout@v6
 
@@ -52,6 +59,29 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      # MinIO is run as a plain `docker run` (not a GHA service) because GHA
+      # services can't override the entrypoint args MinIO needs (`server /data`).
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:9000/minio/health/live; then
+              echo "minio ready"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Create MinIO buckets
+        run: |
+          docker run --rm --network host \
+            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
+            minio/mc mb -p local/public local/private
 
       - name: Apply Prisma migrations
         run: bunx prisma migrate deploy

@@ -84,12 +84,20 @@ sed_inplace "s|\"[0-9][0-9]*:9001\"|\"${MINIO_CONSOLE_PORT}:9001\"|g" docker-com
 # Make sure the keys exist in .env (older workspaces predate them) before we sed-replace.
 ensure_env_kv MINIO_API_PORT 9000
 ensure_env_kv MINIO_CONSOLE_PORT 9001
-ensure_env_kv MINIO_ROOT_USER minioadmin
-ensure_env_kv MINIO_ROOT_PASSWORD minioadmin
-ensure_env_kv MINIO_ENDPOINT "http://localhost:9000"
+ensure_env_kv S3_ENDPOINT "http://localhost:9000"
+ensure_env_kv S3_REGION us-east-1
+ensure_env_kv S3_ACCESS_KEY_ID minioadmin
+ensure_env_kv S3_SECRET_ACCESS_KEY minioadmin
+ensure_env_kv S3_PUBLIC_BUCKET public
+ensure_env_kv S3_PRIVATE_BUCKET private
+ensure_env_kv S3_FORCE_PATH_STYLE true
 sed_inplace "s/^MINIO_API_PORT=.*/MINIO_API_PORT=$MINIO_API_PORT/" .env
 sed_inplace "s/^MINIO_CONSOLE_PORT=.*/MINIO_CONSOLE_PORT=$MINIO_CONSOLE_PORT/" .env
-sed_inplace "s|^MINIO_ENDPOINT=.*|MINIO_ENDPOINT=http://localhost:$MINIO_API_PORT|" .env
+sed_inplace "s|^S3_ENDPOINT=.*|S3_ENDPOINT=http://localhost:$MINIO_API_PORT|" .env
+# Older workspaces may still have legacy MINIO_* keys — drop them so .env stays clean.
+sed_inplace "/^MINIO_ROOT_USER=/d" .env
+sed_inplace "/^MINIO_ROOT_PASSWORD=/d" .env
+sed_inplace "/^MINIO_ENDPOINT=/d" .env
 
 # MailHog host ports — same convention as MinIO. SMTP sink for dev/test, no production use.
 # No readiness probe: mailhog starts fast, no other init step depends on it, and the image
