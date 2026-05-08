@@ -3,18 +3,18 @@ import type { PrismaClient } from "@prisma/client";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { normalizeIncomingUsPhoneToE164 } from "./phone-us";
-import { employeeRowSelect } from "./row-select";
-import type { UpdateEmployeeInput } from "./schemas";
+import { contactRowSelect } from "./row-select";
+import type { UpdateContactInput } from "./schemas";
 
-export class EmployeeNotInOrganizationError extends Error {
+export class ContactNotInOrganizationError extends Error {
   constructor() {
-    super("employee not found in organization");
-    this.name = "EmployeeNotInOrganizationError";
+    super("contact not found in organization");
+    this.name = "ContactNotInOrganizationError";
   }
 }
 
-export async function updateEmployee(
-  params: UpdateEmployeeInput & { actingUserId: string },
+export async function updateContact(
+  params: UpdateContactInput & { actingUserId: string },
   db: PrismaTransaction | PrismaClient = prisma,
 ) {
   const actor = await db.user.findUniqueOrThrow({
@@ -22,14 +22,14 @@ export async function updateEmployee(
     select: { id: true, name: true },
   });
 
-  const existing = await db.employee.findFirst({
+  const existing = await db.contact.findFirst({
     where: {
       id: params.id,
       organizationId: params.organizationId,
     },
     select: { id: true },
   });
-  if (!existing) throw new EmployeeNotInOrganizationError();
+  if (!existing) throw new ContactNotInOrganizationError();
 
   const data: {
     name?: string;
@@ -47,9 +47,9 @@ export async function updateEmployee(
     data.phone = normalizeIncomingUsPhoneToE164(params.phone);
   }
 
-  return db.employee.update({
+  return db.contact.update({
     where: { id: params.id },
     data,
-    select: employeeRowSelect,
+    select: contactRowSelect,
   });
 }

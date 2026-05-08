@@ -2,10 +2,10 @@ import { parsePhoneNumberWithError } from "libphonenumber-js";
 
 const DEFAULT_REGION = "US" as const;
 
-export class InvalidEmployeePhoneError extends Error {
+export class InvalidContactPhoneError extends Error {
   constructor() {
     super("invalid US phone number");
-    this.name = "InvalidEmployeePhoneError";
+    this.name = "InvalidContactPhoneError";
   }
 }
 
@@ -16,16 +16,16 @@ export class InvalidEmployeePhoneError extends Error {
 export function normalizeIncomingUsPhoneToE164(raw: string): string {
   const trimmed = raw.trim();
   if (trimmed.length === 0) {
-    throw new InvalidEmployeePhoneError();
+    throw new InvalidContactPhoneError();
   }
   try {
     const parsed = parsePhoneNumberWithError(trimmed, DEFAULT_REGION);
     if (parsed.country !== DEFAULT_REGION || !parsed.isValid()) {
-      throw new InvalidEmployeePhoneError();
+      throw new InvalidContactPhoneError();
     }
     return parsed.format("E.164");
   } catch (e) {
-    if (e instanceof InvalidEmployeePhoneError) throw e;
-    throw new InvalidEmployeePhoneError();
+    if (e instanceof InvalidContactPhoneError) throw e;
+    throw new InvalidContactPhoneError();
   }
 }

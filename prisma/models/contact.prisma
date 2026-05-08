@@ -1,4 +1,4 @@
-model Employee {
+model Contact {
   id                String    @id @default(cuid())
   organizationId    String
   organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -14,7 +14,7 @@ model Employee {
   updatedByUserId   String?
   createdByUserName String?
   updatedByUserName String?
-  createdByUser     User?     @relation("EmployeeCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  updatedByUser     User?     @relation("EmployeeUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-  usersWithThisProfile User[] @relation("UserEmployeeLink")
+  createdByUser     User?     @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser     User?     @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  usersWithThisProfile User[] @relation("UserContactLink")
 }

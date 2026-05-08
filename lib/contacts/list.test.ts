@@ -1,59 +1,60 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
-import { makeEmployeeWithOrg } from "@/test/test-employee";
+import { makeContactWithOrg } from "@/test/test-contact";
 
 import { prisma } from "../prisma";
 
-import { createEmployee } from "./create";
-import { listEmployeesInOrganization } from "./list";
-import { listEmployeesInputSchema } from "./schemas";
+import { createContact } from "./create";
+import { listContactsInOrganization } from "./list";
+import { listContactsInputSchema } from "./schemas";
 
-describe("listEmployeesInOrganization", () => {
+describe("listContactsInOrganization", () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  test("returns only employees for the requested organization", async () => {
-    const { org, employee } = await makeEmployeeWithOrg("emp-list-mine");
-    const { org: otherOrg, employee: otherEmployee } =
-      await makeEmployeeWithOrg("emp-list-theirs");
+  test("returns only contacts for the requested organization", async () => {
+    const { org, contact } = await makeContactWithOrg("contact-list-mine");
+    const { org: otherOrg, contact: otherContact } = await makeContactWithOrg(
+      "contact-list-theirs",
+    );
 
-    const rows = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({ organizationId: org.id }),
+    const rows = await listContactsInOrganization(
+      listContactsInputSchema.parse({ organizationId: org.id }),
     );
     const ids = rows.map((r) => r.id);
-    expect(ids).toContain(employee.id);
-    expect(ids).not.toContain(otherEmployee.id);
+    expect(ids).toContain(contact.id);
+    expect(ids).not.toContain(otherContact.id);
     expect(otherOrg.id).not.toBe(org.id);
   });
 
   test("filters by case-insensitive match on name or email", async () => {
     const slug = createId();
-    const { org, owner } = await makeEmployeeWithOrg("emp-list-search");
-    const target = await createEmployee({
+    const { org, owner } = await makeContactWithOrg("contact-list-search");
+    const target = await createContact({
       organizationId: org.id,
       actingUserId: owner.id,
       name: `Quarry Lead ${slug}`,
       email: `hidden-${slug}@inner.example.test`,
     });
-    await createEmployee({
+    await createContact({
       organizationId: org.id,
       actingUserId: owner.id,
       name: `Noise Row ${slug}`,
       email: `noise-${slug}@example.test`,
     });
 
-    const byName = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const byName = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         search: "quarry",
       }),
     );
     expect(byName.map((r) => r.id)).toEqual([target.id]);
 
-    const byEmail = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const byEmail = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         search: "inner.example",
       }),
@@ -63,30 +64,30 @@ describe("listEmployeesInOrganization", () => {
 
   test("matches phone via digits stripped from a formatted query", async () => {
     const slug = createId();
-    const { org, owner } = await makeEmployeeWithOrg("emp-list-phone");
-    const target = await createEmployee({
+    const { org, owner } = await makeContactWithOrg("contact-list-phone");
+    const target = await createContact({
       organizationId: org.id,
       actingUserId: owner.id,
       name: `Phone Match ${slug}`,
       phone: "(415) 555-0142",
     });
-    await createEmployee({
+    await createContact({
       organizationId: org.id,
       actingUserId: owner.id,
       name: `Other Phone ${slug}`,
       phone: "+12125550000",
     });
 
-    const formatted = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const formatted = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         search: "(415) 555-0142",
       }),
     );
     expect(formatted.map((r) => r.id)).toEqual([target.id]);
 
-    const partialDigits = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const partialDigits = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         search: "5550142",
       }),
@@ -95,25 +96,25 @@ describe("listEmployeesInOrganization", () => {
   });
 
   test("respects limit and offset for pagination", async () => {
-    const { org, owner } = await makeEmployeeWithOrg("emp-list-page");
+    const { org, owner } = await makeContactWithOrg("contact-list-page");
     for (let i = 0; i < 3; i += 1) {
-      await createEmployee({
+      await createContact({
         organizationId: org.id,
         actingUserId: owner.id,
-        name: `Page Emp ${i} ${createId()}`,
+        name: `Page Contact ${i} ${createId()}`,
       });
     }
 
-    const firstTwo = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const firstTwo = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         limit: 2,
         offset: 0,
       }),
     );
     expect(firstTwo).toHaveLength(2);
-    const next = await listEmployeesInOrganization(
-      listEmployeesInputSchema.parse({
+    const next = await listContactsInOrganization(
+      listContactsInputSchema.parse({
         organizationId: org.id,
         limit: 2,
         offset: 2,

@@ -2,15 +2,15 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
-import { employeeRowSelect } from "./row-select";
-import type { ListEmployeesInput } from "./schemas";
+import { contactRowSelect } from "./row-select";
+import type { ListContactsInput } from "./schemas";
 
-export async function listEmployeesInOrganization(
-  filters: ListEmployeesInput,
+export async function listContactsInOrganization(
+  filters: ListContactsInput,
   db: PrismaTransaction | PrismaClient = prisma,
 ) {
   const search = filters.search?.trim();
-  const or: Prisma.EmployeeWhereInput[] = [];
+  const or: Prisma.ContactWhereInput[] = [];
   if (search && search.length > 0) {
     or.push({ name: { contains: search, mode: "insensitive" } });
     or.push({ email: { contains: search, mode: "insensitive" } });
@@ -23,12 +23,12 @@ export async function listEmployeesInOrganization(
     }
   }
 
-  return db.employee.findMany({
+  return db.contact.findMany({
     where: {
       organizationId: filters.organizationId,
       ...(or.length > 0 ? { OR: or } : {}),
     },
-    select: employeeRowSelect,
+    select: contactRowSelect,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: filters.limit,
     skip: filters.offset,

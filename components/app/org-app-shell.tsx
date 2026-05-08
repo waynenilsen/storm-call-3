@@ -50,7 +50,7 @@ export function OrgAppShell({
   const base = `/o/${org.slug}`;
   const navItems = [
     { href: base, label: "Overview" },
-    { href: `${base}/employees`, label: "Employees" },
+    { href: `${base}/contacts`, label: "Contacts" },
     { href: `${base}/callouts`, label: "Callouts" },
     { href: `${base}/settings`, label: "Organization" },
   ] as const;

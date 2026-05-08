@@ -25,7 +25,7 @@ import {
 import { ORG_ROLE } from "@/lib/organizations/schemas";
 import { useTRPC } from "@/lib/trpc/client";
 
-export default function OrgEmployeesPage(props: {
+export default function OrgContactsPage(props: {
   params: Promise<{ orgSlug: string }>;
 }) {
   const { orgSlug } = use(props.params);
@@ -50,8 +50,8 @@ export default function OrgEmployeesPage(props: {
     trpc.organizations.getBySlug.queryOptions({ slug: orgSlug }),
   );
 
-  const employeesQuery = useQuery(
-    trpc.employees.list.queryOptions(
+  const contactsQuery = useQuery(
+    trpc.contacts.list.queryOptions(
       orgQuery.data
         ? {
             organizationId: orgQuery.data.id,
@@ -64,7 +64,7 @@ export default function OrgEmployeesPage(props: {
   );
 
   const createMutation = useMutation(
-    trpc.employees.create.mutationOptions({
+    trpc.contacts.create.mutationOptions({
       onSuccess: async () => {
         setName("");
         setEmail("");
@@ -72,7 +72,7 @@ export default function OrgEmployeesPage(props: {
         setError(null);
         if (orgQuery.data) {
           await queryClient.invalidateQueries(
-            trpc.employees.list.queryFilter({
+            trpc.contacts.list.queryFilter({
               organizationId: orgQuery.data.id,
             }),
           );
@@ -107,16 +107,16 @@ export default function OrgEmployeesPage(props: {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-medium">Employees</h1>
+        <h1 className="text-lg font-medium">Contacts</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          US phone numbers are stored in E.164. Only owners can add employees.
+          US phone numbers are stored in E.164. Only owners can add contacts.
         </p>
       </div>
 
       {isOwner ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Add employee</CardTitle>
+            <CardTitle className="text-base">Add contact</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -169,7 +169,7 @@ export default function OrgEmployeesPage(props: {
               </div>
               <div className="sm:col-span-2">
                 <Button type="submit" disabled={!canSubmit}>
-                  {createMutation.isPending ? "Adding…" : "Add employee"}
+                  {createMutation.isPending ? "Adding…" : "Add contact"}
                 </Button>
               </div>
             </form>
@@ -182,7 +182,7 @@ export default function OrgEmployeesPage(props: {
         </Card>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Only organization owners can manage employees.
+          Only organization owners can manage contacts.
         </p>
       )}
 
@@ -197,13 +197,13 @@ export default function OrgEmployeesPage(props: {
             maxLength={200}
             placeholder="Search name, email, or phone…"
             className="max-w-xs"
-            aria-label="Search employees"
+            aria-label="Search contacts"
           />
         </CardHeader>
         <CardContent>
-          {employeesQuery.isPending ? (
+          {contactsQuery.isPending ? (
             <Skeleton className="h-24 w-full" />
-          ) : employeesQuery.data && employeesQuery.data.length > 0 ? (
+          ) : contactsQuery.data && contactsQuery.data.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -214,7 +214,7 @@ export default function OrgEmployeesPage(props: {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employeesQuery.data.map((row) => (
+                {contactsQuery.data.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>{row.name ?? "—"}</TableCell>
                     <TableCell>{row.email ?? "—"}</TableCell>
@@ -223,7 +223,7 @@ export default function OrgEmployeesPage(props: {
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
-                        href={`/o/${orgSlug}/employees/${row.id}`}
+                        href={`/o/${orgSlug}/contacts/${row.id}`}
                         className="text-sm underline-offset-4 hover:underline"
                       >
                         View
@@ -235,10 +235,10 @@ export default function OrgEmployeesPage(props: {
             </Table>
           ) : debouncedSearch ? (
             <p className="text-sm text-muted-foreground">
-              No employees match “{debouncedSearch}”.
+              No contacts match “{debouncedSearch}”.
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">No employees yet.</p>
+            <p className="text-sm text-muted-foreground">No contacts yet.</p>
           )}
         </CardContent>
       </Card>

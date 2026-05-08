@@ -1,5 +1,5 @@
-/** Shared projection for employee reads / writes returned to callers. */
-export const employeeRowSelect = {
+/** Shared projection for contact reads / writes returned to callers. */
+export const contactRowSelect = {
   id: true,
   organizationId: true,
   name: true,
