@@ -2,6 +2,7 @@ import { publicProcedure, router } from "@/server/trpc/init";
 import { authRouter } from "@/server/trpc/routers/auth";
 import { calloutsRouter } from "@/server/trpc/routers/callouts";
 import { contactsRouter } from "@/server/trpc/routers/contacts";
+import { equipmentRouter } from "@/server/trpc/routers/equipment";
 import { organizationsRouter } from "@/server/trpc/routers/organizations";
 
 export const appRouter = router({
@@ -10,6 +11,7 @@ export const appRouter = router({
   organizations: organizationsRouter,
   contacts: contactsRouter,
   callouts: calloutsRouter,
+  equipment: equipmentRouter,
 });
 
 export type AppRouter = typeof appRouter;

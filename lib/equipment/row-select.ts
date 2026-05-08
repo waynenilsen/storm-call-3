@@ -1,0 +1,16 @@
+export const equipmentRowSelect = {
+  id: true,
+  organizationId: true,
+  companyCode: true,
+  type: true,
+  subtype: true,
+  mechanicalStatus: true,
+  toolStatus: true,
+  notes: true,
+  createdAt: true,
+  updatedAt: true,
+  createdByUserId: true,
+  updatedByUserId: true,
+  createdByUserName: true,
+  updatedByUserName: true,
+} as const;
