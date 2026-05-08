@@ -1,4 +1,3 @@
-import { getUserForSessionToken } from "@/lib/auth/resolve-session";
 import { signInInputSchema, signUpInputSchema } from "@/lib/auth/schemas";
 import { createSession } from "@/lib/auth/session";
 import {
@@ -13,13 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure, router } from "@/server/trpc/init";
 
 export const authRouter = router({
-  session: publicProcedure.query(async ({ ctx }) => {
-    const token = getSessionTokenFromRequest(ctx.req);
-    if (!token) {
-      return null;
-    }
-    return getUserForSessionToken(token);
-  }),
+  session: publicProcedure.query(({ ctx }) => ctx.user),
 
   signUp: publicProcedure
     .input(signUpInputSchema)

@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,10 +28,22 @@ type SessionUser = NonNullable<
   inferRouterOutputs<AppRouter>["auth"]["session"]
 >;
 
-export function DashboardShell({ user }: { user: SessionUser }) {
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/organizations", label: "Organizations" },
+] as const;
+
+export function DashboardShell({
+  user,
+  children,
+}: {
+  user: SessionUser;
+  children: React.ReactNode;
+}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const pathname = usePathname();
 
   const signOutMutation = useMutation(
     trpc.auth.signOut.mutationOptions({
@@ -58,21 +70,32 @@ export function DashboardShell({ user }: { user: SessionUser }) {
             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton disabled aria-disabled>
-                    Overview
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton disabled aria-disabled>
-                    Settings
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {NAV_ITEMS.map((item) => {
+                  const active =
+                    item.href === "/dashboard"
+                      ? pathname === item.href
+                      : pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`);
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={active}
+                        render={<Link href={item.href} />}
+                      >
+                        {item.label}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2">
+          <div className="mb-2 px-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground">{user.name}</div>
+            <div className="truncate">{user.email}</div>
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -87,14 +110,9 @@ export function DashboardShell({ user }: { user: SessionUser }) {
       <SidebarInset className="flex min-h-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
-          <span className="text-sm text-muted-foreground">
-            Dashboard placeholder
-          </span>
+          <span className="text-sm text-muted-foreground">Dashboard</span>
         </header>
-        <main className="flex min-h-0 flex-1 flex-col p-6">
-          <h1 className="text-lg font-medium">Hello, {user.name}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
-        </main>
+        <main className="flex min-h-0 flex-1 flex-col p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
