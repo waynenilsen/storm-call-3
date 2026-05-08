@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# shellcheck source=./find-free-port.sh
+source "$(dirname "$0")/find-free-port.sh"
+
 echo "Installing dependencies..."
 bun i
 echo "Installing dependencies... done"
@@ -28,7 +31,7 @@ fi
 
 
 # Host port reserved for this workspace (avoid collisions when many clones run Postgres locally).
-DATABASE_PORT=$((50000 + RANDOM % 10000))
+DATABASE_PORT=$(find_free_port 50000 60000 50)
 # Compose may already have a numeric "HOST:5432"; keep it aligned with DATABASE_PORT whenever we init.
 sed_inplace "s|\"DATABASE_PORT:5432\"|\"${DATABASE_PORT}:5432\"|g" docker-compose.yml
 sed_inplace "s|\"[0-9][0-9]*:5432\"|\"${DATABASE_PORT}:5432\"|g" docker-compose.yml
@@ -45,8 +48,11 @@ while ! docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1; 
 done
 echo "postgres is ready"
 
-# Port for web app random from 50000 to 60000
-PORT=$((50000 + RANDOM % 10000))
+# Port for web app, also picked from the 50000-60000 range. Re-rolls if taken.
+PORT=$(find_free_port 50000 60000 50)
+while [ "$PORT" = "$DATABASE_PORT" ]; do
+  PORT=$(find_free_port 50000 60000 50)
+done
 sed_inplace "s/^PORT=.*/PORT=$PORT/" .env
 echo "Web app port set to $PORT"
 
