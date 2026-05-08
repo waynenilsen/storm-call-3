@@ -14,6 +14,7 @@ import {
   updateOrganizationInputSchema,
 } from "@/lib/organizations/schemas";
 import { updateOrganization } from "@/lib/organizations/update";
+import { prisma } from "@/lib/prisma";
 import { protectedProcedure, router } from "@/server/trpc/init";
 
 export const organizationsRouter = router({
@@ -55,21 +56,25 @@ export const organizationsRouter = router({
 
   create: protectedProcedure
     .input(createOrganizationInputSchema)
-    .mutation(({ ctx, input }) =>
-      createOrganization({ ...input, ownerUserId: ctx.user.id }),
+    .mutation(async ({ ctx, input }) =>
+      prisma.$transaction((tx) =>
+        createOrganization({ ...input, ownerUserId: ctx.user.id }, tx),
+      ),
     ),
 
   update: protectedProcedure
     .input(updateOrganizationInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.id);
-      return updateOrganization(input);
+      return prisma.$transaction((tx) => updateOrganization(input, tx));
     }),
 
   delete: protectedProcedure
     .input(organizationByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.id);
-      return deleteOrganization({ id: input.id });
+      return prisma.$transaction((tx) =>
+        deleteOrganization({ id: input.id }, tx),
+      );
     }),
 });

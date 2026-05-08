@@ -12,6 +12,7 @@ import {
   updateEquipmentInputSchema,
 } from "@/lib/equipment/schemas";
 import { updateEquipment } from "@/lib/equipment/update";
+import { prisma } from "@/lib/prisma";
 import { protectedProcedure, router } from "@/server/trpc/init";
 
 export const equipmentRouter = router({
@@ -40,20 +41,24 @@ export const equipmentRouter = router({
     .input(createEquipmentInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return createEquipment({ ...input, actingUserId: ctx.user.id });
+      return prisma.$transaction((tx) =>
+        createEquipment({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 
   update: protectedProcedure
     .input(updateEquipmentInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return updateEquipment({ ...input, actingUserId: ctx.user.id });
+      return prisma.$transaction((tx) =>
+        updateEquipment({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 
   delete: protectedProcedure
     .input(equipmentByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return deleteEquipment(input);
+      return prisma.$transaction((tx) => deleteEquipment(input, tx));
     }),
 });

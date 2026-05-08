@@ -16,6 +16,7 @@ import {
   ContactNotInOrganizationError,
   updateContact,
 } from "@/lib/contacts/update";
+import { prisma } from "@/lib/prisma";
 import { protectedProcedure, router } from "@/server/trpc/init";
 
 function throwInvalidPhone(e: unknown): never {
@@ -52,10 +53,15 @@ export const contactsRouter = router({
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.organizationId);
       try {
-        return await createContact({
-          ...input,
-          actingUserId: ctx.user.id,
-        });
+        return await prisma.$transaction((tx) =>
+          createContact(
+            {
+              ...input,
+              actingUserId: ctx.user.id,
+            },
+            tx,
+          ),
+        );
       } catch (e) {
         throwInvalidPhone(e);
       }
@@ -66,10 +72,15 @@ export const contactsRouter = router({
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.organizationId);
       try {
-        return await updateContact({
-          ...input,
-          actingUserId: ctx.user.id,
-        });
+        return await prisma.$transaction((tx) =>
+          updateContact(
+            {
+              ...input,
+              actingUserId: ctx.user.id,
+            },
+            tx,
+          ),
+        );
       } catch (e) {
         if (e instanceof ContactNotInOrganizationError) {
           throw new TRPCError({
@@ -85,7 +96,9 @@ export const contactsRouter = router({
     .input(contactByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.organizationId);
-      const result = await deleteContact(input);
+      const result = await prisma.$transaction((tx) =>
+        deleteContact(input, tx),
+      );
       if (!result.ok) {
         throw new TRPCError({
           code: "NOT_FOUND",

@@ -18,7 +18,7 @@ export const authRouter = router({
   signUp: publicProcedure
     .input(signUpInputSchema)
     .mutation(async ({ input, ctx }) => {
-      const result = await signUp(input);
+      const result = await prisma.$transaction((tx) => signUp(input, tx));
       if (!result.created) {
         return result;
       }
@@ -72,7 +72,7 @@ export const authRouter = router({
   signOut: publicProcedure.mutation(async ({ ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (token) {
-      await signOut({ token });
+      await prisma.$transaction((tx) => signOut({ token }, tx));
     }
     appendSessionClearCookie(ctx.resHeaders, ctx.req);
     return { ok: true as const };

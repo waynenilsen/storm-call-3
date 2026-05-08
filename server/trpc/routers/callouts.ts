@@ -12,6 +12,7 @@ import {
   updateCalloutInputSchema,
 } from "@/lib/callouts/schemas";
 import { updateCallout } from "@/lib/callouts/update";
+import { prisma } from "@/lib/prisma";
 import { protectedProcedure, router } from "@/server/trpc/init";
 
 export const calloutsRouter = router({
@@ -40,20 +41,24 @@ export const calloutsRouter = router({
     .input(createCalloutInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return createCallout({ ...input, actingUserId: ctx.user.id });
+      return prisma.$transaction((tx) =>
+        createCallout({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 
   update: protectedProcedure
     .input(updateCalloutInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return updateCallout({ ...input, actingUserId: ctx.user.id });
+      return prisma.$transaction((tx) =>
+        updateCallout({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 
   delete: protectedProcedure
     .input(calloutByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return deleteCallout(input);
+      return prisma.$transaction((tx) => deleteCallout(input, tx));
     }),
 });

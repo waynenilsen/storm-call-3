@@ -13,6 +13,7 @@ import {
   messageByIdInputSchema,
   sendMessageInputSchema,
 } from "@/lib/messages/schemas";
+import { prisma } from "@/lib/prisma";
 import { protectedProcedure, router } from "@/server/trpc/init";
 
 export const messagesRouter = router({
@@ -42,11 +43,16 @@ export const messagesRouter = router({
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
       try {
-        return await createMessage({
-          ...input,
-          direction: MESSAGE_DIRECTION.OUTBOUND,
-          actingUserId: ctx.user.id,
-        });
+        return await prisma.$transaction((tx) =>
+          createMessage(
+            {
+              ...input,
+              direction: MESSAGE_DIRECTION.OUTBOUND,
+              actingUserId: ctx.user.id,
+            },
+            tx,
+          ),
+        );
       } catch (e) {
         if (e instanceof ConversationNotInOrganizationError) {
           throw new TRPCError({
