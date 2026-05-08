@@ -1,0 +1,25 @@
+model Conversation {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contactId      String
+  contact        Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  /// Denormalized rollups updated by the message service on insert. Lets the inbox list
+  /// render without joining or aggregating Message on every read.
+  lastMessageAt        DateTime?
+  lastMessagePreview   String?
+  lastMessageDirection String?
+  lastInboundAt        DateTime?
+  lastOutboundAt       DateTime?
+  messageCount         Int       @default(0)
+  /// Org-wide unread counter. Per-user read state would need a separate join table.
+  unreadCount          Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  @@unique([organizationId, contactId])
+}

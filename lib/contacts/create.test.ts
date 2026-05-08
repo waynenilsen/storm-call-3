@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { getConversationByContactId } from "@/lib/conversations/get";
 import { createOrganization } from "@/lib/organizations/create";
 import { makeUser } from "@/test/test-user";
 
@@ -43,6 +44,17 @@ describe("createContact", () => {
       select: { organizationId: true },
     });
     expect(row.organizationId).toBe(org.id);
+
+    // Empty conversation is paired 1:1 with the contact on creation.
+    const conversation = await getConversationByContactId({
+      contactId: contact.id,
+      organizationId: org.id,
+    });
+    expect(conversation).not.toBeNull();
+    expect(conversation?.organizationId).toBe(org.id);
+    expect(conversation?.messageCount).toBe(0);
+    expect(conversation?.unreadCount).toBe(0);
+    expect(conversation?.lastMessageAt).toBeNull();
   });
 
   test("normalizes US-local formatted phone to E.164 on create", async () => {

@@ -18,6 +18,7 @@ model User {
   calloutsUpdated        Callout[]          @relation("CalloutUpdatedBy")
   equipmentCreated       Equipment[]        @relation("EquipmentCreatedBy")
   equipmentUpdated       Equipment[]        @relation("EquipmentUpdatedBy")
+  messagesSent           Message[]          @relation("MessageSentBy")
 }
 
 model Organization {
@@ -30,7 +31,9 @@ model Organization {
   memberships                     UserOrganization[]
   contacts                        Contact[]
   callouts                        Callout[]
+  conversations                   Conversation[]
   equipment                       Equipment[]
+  messages                        Message[]
   usersHavingSelectedOrganization User[]             @relation("UserSelectedOrganization")
 }
 

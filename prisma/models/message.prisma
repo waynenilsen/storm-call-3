@@ -1,0 +1,24 @@
+model Message {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  content   String
+  /// 'inbound' (from contact) or 'outbound' (from a user in the org).
+  direction String
+
+  /// Outbound only — null for inbound messages from the contact.
+  sentByUserId   String?
+  sentByUser     User?   @relation("MessageSentBy", fields: [sentByUserId], references: [id], onDelete: SetNull)
+  sentByUserName String?
+
+  /// SMS provider metadata (e.g. Twilio). Populated once provider integration is wired up.
+  providerMessageId String?
+  status            String?
+  errorCode         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

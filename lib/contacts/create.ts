@@ -33,6 +33,14 @@ export async function createContact(
         updatedByUserId: actor.id,
         createdByUserName: actor.name,
         updatedByUserName: actor.name,
+        // Empty SMS conversation paired 1:1 with the contact. The (org, contact)
+        // unique constraint makes this the canonical thread for future messages.
+        conversations: {
+          create: {
+            id: createId(),
+            organizationId: params.organizationId,
+          },
+        },
       },
       select: contactRowSelect,
     });
