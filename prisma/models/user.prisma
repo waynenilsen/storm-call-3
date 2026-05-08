@@ -1,13 +1,17 @@
 model User {
-  id           String               @id @default(cuid())
-  name         String
-  email        String               @unique
-  passwordHash String
-  adminRole    String?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  memberships  UserOrganization[]
-  sessions     Session[]
+  id             String               @id @default(cuid())
+  name           String
+  email          String               @unique
+  passwordHash   String
+  adminRole      String?
+  employeeId     String?
+  employee       Employee?            @relation("UserEmployeeLink", fields: [employeeId], references: [id], onDelete: SetNull)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  memberships    UserOrganization[]
+  sessions       Session[]
+  employeesCreated Employee[]        @relation("EmployeeCreatedBy")
+  employeesUpdated Employee[]        @relation("EmployeeUpdatedBy")
 }
 
 model Organization {
@@ -16,6 +20,7 @@ model Organization {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   memberships UserOrganization[]
+  employees   Employee[]
 }
 
 model UserOrganization {
