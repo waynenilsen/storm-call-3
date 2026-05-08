@@ -1,6 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
 
+import { recordActivity } from "../activity/record";
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "../activity/schemas";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { equipmentRowSelect } from "./row-select";
@@ -16,7 +18,7 @@ export async function createEquipment(
       select: { id: true, name: true },
     });
 
-    return runner.equipment.create({
+    const equipment = await runner.equipment.create({
       data: {
         id: createId(),
         organizationId: params.organizationId,
@@ -33,6 +35,21 @@ export async function createEquipment(
       },
       select: equipmentRowSelect,
     });
+
+    await recordActivity(
+      {
+        organizationId: params.organizationId,
+        actorUserId: actor.id,
+        actorUserName: actor.name,
+        action: ACTIVITY_ACTION.EQUIPMENT_CREATED,
+        resourceType: RESOURCE_TYPE.EQUIPMENT,
+        resourceId: equipment.id,
+        resourceLabel: equipment.companyCode,
+      },
+      runner as PrismaTransaction,
+    );
+
+    return equipment;
   };
 
   if (tx) return run(tx);

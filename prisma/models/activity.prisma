@@ -1,0 +1,22 @@
+model Activity {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  actorUserId    String?
+  actorUser      User?        @relation("ActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorUserName  String?
+
+  action         String
+  resourceType   String
+  resourceId     String
+  resourceLabel  String?
+
+  metadata       Json?
+
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([organizationId, resourceType, resourceId])
+  @@index([organizationId, actorUserId, createdAt(sort: Desc)])
+}

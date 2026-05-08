@@ -42,6 +42,9 @@ export default function OrgSettingsPage(props: {
             trpc.organizations.getBySlug.queryFilter({ slug: orgSlug }),
           ),
           queryClient.invalidateQueries(trpc.organizations.list.queryFilter()),
+          queryClient.invalidateQueries(
+            trpc.activity.list.queryFilter({ organizationId: updated.id }),
+          ),
         ]);
         if (updated.slug !== orgSlug) {
           router.replace(`/o/${updated.slug}/settings`);

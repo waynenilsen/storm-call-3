@@ -1,11 +1,10 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
-
+import { ACTIVITY_ACTION } from "@/lib/activity/schemas";
 import { getConversationByContactId } from "@/lib/conversations/get";
 import { createOrganization } from "@/lib/organizations/create";
 import { makeConversationWithContact } from "@/test/test-conversation";
 import { makeUser } from "@/test/test-user";
-
 import { prisma } from "../prisma";
 
 import {
@@ -54,6 +53,16 @@ describe("createMessage", () => {
     expect(lastAt).toBeGreaterThanOrEqual(before);
     expect(lastAt).toBeLessThanOrEqual(after + 1000);
     expect(refreshed?.lastOutboundAt?.getTime()).toBe(lastAt);
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: message.id,
+        action: ACTIVITY_ACTION.MESSAGE_SENT_OUTBOUND,
+      },
+    });
+    expect(activity.actorUserId).toBe(owner.id);
+    expect(activity.resourceLabel).toBe("Hello there");
   });
 
   test("inbound: leaves actor null and increments unreadCount", async () => {
@@ -84,6 +93,14 @@ describe("createMessage", () => {
     expect(refreshed?.lastMessageDirection).toBe("inbound");
     expect(refreshed?.lastInboundAt).not.toBeNull();
     expect(refreshed?.lastOutboundAt).toBeNull();
+
+    const inboundActivity = await prisma.activity.findFirst({
+      where: {
+        organizationId: org.id,
+        resourceId: message.id,
+      },
+    });
+    expect(inboundActivity).toBeNull();
   });
 
   test("rollups accumulate across mixed-direction messages", async () => {

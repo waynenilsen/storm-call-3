@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { ACTIVITY_ACTION } from "@/lib/activity/schemas";
 import { makeUser } from "@/test/test-user";
 
 import { prisma } from "../prisma";
@@ -24,6 +25,7 @@ describe("updateOrganization", () => {
     const renamed = await updateOrganization({
       id: org.id,
       name: newName,
+      actingUserId: me.id,
     });
     expect(renamed.name).toBe(newName);
     expect(renamed.slug).toBe(slugify(newName));
@@ -34,6 +36,16 @@ describe("updateOrganization", () => {
     });
     expect(stored.name).toBe(newName);
     expect(stored.slug).toBe(slugify(newName));
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: org.id,
+        action: ACTIVITY_ACTION.ORGANIZATION_UPDATED,
+      },
+    });
+    expect(activity.actorUserId).toBe(me.id);
+    expect(activity.metadata).toEqual({ changedFields: ["name"] });
   });
 
   test("picks non-colliding slug when the new name matches another org slug", async () => {
@@ -50,6 +62,7 @@ describe("updateOrganization", () => {
     const refreshed = await updateOrganization({
       id: other.id,
       name: `primary brand??? ${suffix}`,
+      actingUserId: owner.id,
     });
     const expectedBase = slugify(`Primary Brand! ${suffix}`);
     expect(refreshed.slug).toBe(`${expectedBase}-2`);
@@ -66,6 +79,7 @@ describe("updateOrganization", () => {
       id: org.id,
       name: org.name,
       url: "https://acme.test",
+      actingUserId: me.id,
     });
     expect(updated.url).toBe("https://acme.test");
     const stored = await prisma.organization.findUniqueOrThrow({
@@ -86,6 +100,7 @@ describe("updateOrganization", () => {
       id: org.id,
       name: org.name,
       url: null,
+      actingUserId: me.id,
     });
     expect(updated.url).toBeNull();
   });
@@ -100,6 +115,7 @@ describe("updateOrganization", () => {
     const updated = await updateOrganization({
       id: org.id,
       name: `After ${createId()}`,
+      actingUserId: me.id,
     });
     expect(updated.url).toBe("https://keep.test");
   });

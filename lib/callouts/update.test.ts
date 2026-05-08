@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { ACTIVITY_ACTION } from "@/lib/activity/schemas";
 import { createOrganization } from "@/lib/organizations/create";
 import { makeCalloutWithOrg } from "@/test/test-callout";
 import { makeUser } from "@/test/test-user";
@@ -30,6 +31,18 @@ describe("updateCallout", () => {
     expect(updated.updatedByUserId).toBe(editor.id);
     expect(updated.updatedByUserName).toBe(editor.name);
     expect(updated.createdByUserId).toBe(owner.id);
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: callout.id,
+        action: ACTIVITY_ACTION.CALLOUT_UPDATED,
+      },
+    });
+    expect(activity.actorUserId).toBe(editor.id);
+    expect(activity.metadata).toEqual({
+      changedFields: ["name", "messageText"],
+    });
   });
 
   test("supports partial updates that only touch one field", async () => {

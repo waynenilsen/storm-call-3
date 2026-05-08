@@ -1,4 +1,5 @@
 import { publicProcedure, router } from "@/server/trpc/init";
+import { activityRouter } from "@/server/trpc/routers/activity";
 import { authRouter } from "@/server/trpc/routers/auth";
 import { calloutsRouter } from "@/server/trpc/routers/callouts";
 import { contactsRouter } from "@/server/trpc/routers/contacts";
@@ -16,6 +17,7 @@ export const appRouter = router({
   conversations: conversationsRouter,
   messages: messagesRouter,
   equipment: equipmentRouter,
+  activity: activityRouter,
 });
 
 export type AppRouter = typeof appRouter;
