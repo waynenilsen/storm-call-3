@@ -101,6 +101,11 @@ export default function OrgEquipmentDetailPage(props: {
                 organizationId: orgQuery.data.id,
               }),
             ),
+            queryClient.invalidateQueries(
+              trpc.activity.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
           ]);
         }
       },
@@ -112,11 +117,18 @@ export default function OrgEquipmentDetailPage(props: {
     trpc.equipment.delete.mutationOptions({
       onSuccess: async () => {
         if (orgQuery.data) {
-          await queryClient.invalidateQueries(
-            trpc.equipment.list.queryFilter({
-              organizationId: orgQuery.data.id,
-            }),
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.equipment.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+            queryClient.invalidateQueries(
+              trpc.activity.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+          ]);
         }
         router.replace(`/o/${orgSlug}/equipment`);
       },

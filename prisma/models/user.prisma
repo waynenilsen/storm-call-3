@@ -19,6 +19,7 @@ model User {
   equipmentCreated       Equipment[]        @relation("EquipmentCreatedBy")
   equipmentUpdated       Equipment[]        @relation("EquipmentUpdatedBy")
   messagesSent           Message[]          @relation("MessageSentBy")
+  activities             Activity[]         @relation("ActivityActor")
 }
 
 model Organization {
@@ -34,6 +35,7 @@ model Organization {
   conversations                   Conversation[]
   equipment                       Equipment[]
   messages                        Message[]
+  activities                      Activity[]
   usersHavingSelectedOrganization User[]             @relation("UserSelectedOrganization")
 }
 

@@ -1,5 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
+
+import { recordActivity } from "../activity/record";
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "../activity/schemas";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { slugify } from "../slugify";
@@ -39,6 +42,19 @@ export async function createOrganization(
         updatedAt: true,
       },
     });
+
+    await recordActivity(
+      {
+        organizationId: org.id,
+        actorUserId: params.ownerUserId,
+        action: ACTIVITY_ACTION.ORGANIZATION_CREATED,
+        resourceType: RESOURCE_TYPE.ORGANIZATION,
+        resourceId: org.id,
+        resourceLabel: org.name,
+      },
+      runner as PrismaTransaction,
+    );
+
     return { ...org, role: ORG_ROLE.OWNER };
   };
 

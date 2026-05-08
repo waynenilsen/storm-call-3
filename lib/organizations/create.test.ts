@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "@/lib/activity/schemas";
 import { makeUser } from "@/test/test-user";
 
 import { prisma } from "../prisma";
@@ -36,6 +37,17 @@ describe("createOrganization", () => {
       select: { role: true },
     });
     expect(membership.role).toBe(ORG_ROLE.OWNER);
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: org.id,
+        action: ACTIVITY_ACTION.ORGANIZATION_CREATED,
+      },
+    });
+    expect(activity.resourceType).toBe(RESOURCE_TYPE.ORGANIZATION);
+    expect(activity.actorUserId).toBe(user.id);
+    expect(activity.resourceLabel).toBe(`Acme ${token}`);
   });
 
   test("trims and stores org name as provided after schema parse", async () => {

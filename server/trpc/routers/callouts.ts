@@ -59,6 +59,8 @@ export const calloutsRouter = router({
     .input(calloutByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return prisma.$transaction((tx) => deleteCallout(input, tx));
+      return prisma.$transaction((tx) =>
+        deleteCallout({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 });

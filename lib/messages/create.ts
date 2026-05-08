@@ -1,6 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
 
+import { recordActivity } from "../activity/record";
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "../activity/schemas";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { messageRowSelect } from "./row-select";
@@ -106,6 +108,22 @@ export async function createMessage(
         messageCount: { increment: 1 },
       },
     });
+
+    if (isOutbound) {
+      await recordActivity(
+        {
+          organizationId: params.organizationId,
+          actorUserId: sentByUserId,
+          actorUserName: sentByUserName,
+          action: ACTIVITY_ACTION.MESSAGE_SENT_OUTBOUND,
+          resourceType: RESOURCE_TYPE.MESSAGE,
+          resourceId: message.id,
+          resourceLabel: preview,
+          metadata: { conversationId: params.conversationId },
+        },
+        runner as PrismaTransaction,
+      );
+    }
 
     return message;
   };

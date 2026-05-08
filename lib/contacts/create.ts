@@ -1,6 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import type { PrismaClient } from "@prisma/client";
 
+import { recordActivity } from "../activity/record";
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "../activity/schemas";
 import type { PrismaTransaction } from "../prisma";
 import { prisma } from "../prisma";
 import { normalizeIncomingUsPhoneToE164 } from "./phone-us";
@@ -22,7 +24,7 @@ export async function createContact(
         ? undefined
         : normalizeIncomingUsPhoneToE164(params.phone);
 
-    return runner.contact.create({
+    const contact = await runner.contact.create({
       data: {
         id: createId(),
         organizationId: params.organizationId,
@@ -44,6 +46,21 @@ export async function createContact(
       },
       select: contactRowSelect,
     });
+
+    await recordActivity(
+      {
+        organizationId: params.organizationId,
+        actorUserId: actor.id,
+        actorUserName: actor.name,
+        action: ACTIVITY_ACTION.CONTACT_CREATED,
+        resourceType: RESOURCE_TYPE.CONTACT,
+        resourceId: contact.id,
+        resourceLabel: contact.name,
+      },
+      runner as PrismaTransaction,
+    );
+
+    return contact;
   };
 
   if (tx) return run(tx);

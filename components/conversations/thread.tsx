@@ -176,6 +176,9 @@ export function ConversationThread({
           queryClient.invalidateQueries(
             trpc.conversations.list.queryFilter({ organizationId }),
           ),
+          queryClient.invalidateQueries(
+            trpc.activity.list.queryFilter({ organizationId }),
+          ),
         ]);
       },
       onError: (err) => setError(err.message),

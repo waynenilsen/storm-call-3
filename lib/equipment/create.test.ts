@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "@/lib/activity/schemas";
 import { createOrganization } from "@/lib/organizations/create";
 import { makeUser } from "@/test/test-user";
 
@@ -49,6 +50,17 @@ describe("createEquipment", () => {
       select: { organizationId: true },
     });
     expect(row.organizationId).toBe(org.id);
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: equipment.id,
+        action: ACTIVITY_ACTION.EQUIPMENT_CREATED,
+      },
+    });
+    expect(activity.resourceType).toBe(RESOURCE_TYPE.EQUIPMENT);
+    expect(activity.actorUserId).toBe(owner.id);
+    expect(activity.resourceLabel).toBe(equipment.companyCode);
   });
 
   test("allows omitting all optional fields", async () => {

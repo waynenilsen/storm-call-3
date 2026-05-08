@@ -107,11 +107,18 @@ export default function OrgEquipmentPage(props: {
         setNotes("");
         setError(null);
         if (orgQuery.data) {
-          await queryClient.invalidateQueries(
-            trpc.equipment.list.queryFilter({
-              organizationId: orgQuery.data.id,
-            }),
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.equipment.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+            queryClient.invalidateQueries(
+              trpc.activity.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+          ]);
         }
       },
       onError: (err) => setError(err.message),

@@ -67,6 +67,11 @@ export default function OrgCalloutDetailPage(props: {
                 organizationId: orgQuery.data.id,
               }),
             ),
+            queryClient.invalidateQueries(
+              trpc.activity.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
           ]);
         }
       },
@@ -78,11 +83,18 @@ export default function OrgCalloutDetailPage(props: {
     trpc.callouts.delete.mutationOptions({
       onSuccess: async () => {
         if (orgQuery.data) {
-          await queryClient.invalidateQueries(
-            trpc.callouts.list.queryFilter({
-              organizationId: orgQuery.data.id,
-            }),
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.callouts.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+            queryClient.invalidateQueries(
+              trpc.activity.list.queryFilter({
+                organizationId: orgQuery.data.id,
+              }),
+            ),
+          ]);
         }
         router.replace(`/o/${orgSlug}/callouts`);
       },

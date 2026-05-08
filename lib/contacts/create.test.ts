@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createId } from "@paralleldrive/cuid2";
 
+import { ACTIVITY_ACTION, RESOURCE_TYPE } from "@/lib/activity/schemas";
 import { getConversationByContactId } from "@/lib/conversations/get";
 import { createOrganization } from "@/lib/organizations/create";
 import { makeUser } from "@/test/test-user";
@@ -55,6 +56,18 @@ describe("createContact", () => {
     expect(conversation?.messageCount).toBe(0);
     expect(conversation?.unreadCount).toBe(0);
     expect(conversation?.lastMessageAt).toBeNull();
+
+    const activity = await prisma.activity.findFirstOrThrow({
+      where: {
+        organizationId: org.id,
+        resourceId: contact.id,
+        action: ACTIVITY_ACTION.CONTACT_CREATED,
+      },
+    });
+    expect(activity.resourceType).toBe(RESOURCE_TYPE.CONTACT);
+    expect(activity.actorUserId).toBe(owner.id);
+    expect(activity.actorUserName).toBe(owner.name);
+    expect(activity.resourceLabel).toBe(contact.name);
   });
 
   test("normalizes US-local formatted phone to E.164 on create", async () => {

@@ -66,7 +66,9 @@ export const organizationsRouter = router({
     .input(updateOrganizationInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.id);
-      return prisma.$transaction((tx) => updateOrganization(input, tx));
+      return prisma.$transaction((tx) =>
+        updateOrganization({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 
   delete: protectedProcedure

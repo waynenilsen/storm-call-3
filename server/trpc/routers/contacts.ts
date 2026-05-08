@@ -97,7 +97,7 @@ export const contactsRouter = router({
     .mutation(async ({ ctx, input }) => {
       await requireOwner(ctx.user.id, input.organizationId);
       const result = await prisma.$transaction((tx) =>
-        deleteContact(input, tx),
+        deleteContact({ ...input, actingUserId: ctx.user.id }, tx),
       );
       if (!result.ok) {
         throw new TRPCError({

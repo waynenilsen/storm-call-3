@@ -59,6 +59,8 @@ export const equipmentRouter = router({
     .input(equipmentByIdInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireMembership(ctx.user.id, input.organizationId);
-      return prisma.$transaction((tx) => deleteEquipment(input, tx));
+      return prisma.$transaction((tx) =>
+        deleteEquipment({ ...input, actingUserId: ctx.user.id }, tx),
+      );
     }),
 });
