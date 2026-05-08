@@ -14,6 +14,8 @@
     "stop-workspace": "./scripts/stop-workspace.sh",
     "get-dev-port": "dotenv -- node -e \"console.log(process.env.PORT ?? '')\"",
     "get-db-port": "dotenv -- node -e \"console.log(process.env.DATABASE_PORT ?? '')\"",
+    "get-minio-api-port": "dotenv -- node -e \"console.log(process.env.MINIO_API_PORT ?? '')\"",
+    "get-minio-console-port": "dotenv -- node -e \"console.log(process.env.MINIO_CONSOLE_PORT ?? '')\"",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",

@@ -43,3 +43,6 @@ next-env.d.ts
 
 # docker
 docker-compose.yml
+
+# claude code session state (per-workspace lockfiles, etc.)
+.claude/
