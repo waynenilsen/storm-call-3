@@ -6,6 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import Link from "next/link";
 import { use, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -185,6 +186,7 @@ export default function OrgEmployeesPage(props: {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead className="w-0" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -194,6 +196,14 @@ export default function OrgEmployeesPage(props: {
                     <TableCell>{row.email ?? "—"}</TableCell>
                     <TableCell className="font-mono text-xs">
                       {row.phone ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link
+                        href={`/o/${orgSlug}/employees/${row.id}`}
+                        className="text-sm underline-offset-4 hover:underline"
+                      >
+                        View
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
