@@ -1,35 +1,18 @@
 import { TRPCError } from "@trpc/server";
 
+import { requireOwner } from "@/lib/auth/authorization";
 import { createOrganization } from "@/lib/organizations/create";
 import { deleteOrganization } from "@/lib/organizations/delete";
 import { getOrganizationForUser } from "@/lib/organizations/get";
 import { listOrganizationsForUser } from "@/lib/organizations/list";
-import { getMembership } from "@/lib/organizations/membership";
 import {
   createOrganizationInputSchema,
   listOrganizationsInputSchema,
-  ORG_ROLE,
   organizationByIdInputSchema,
   updateOrganizationInputSchema,
 } from "@/lib/organizations/schemas";
 import { updateOrganization } from "@/lib/organizations/update";
 import { protectedProcedure, router } from "@/server/trpc/init";
-
-async function requireOwner(userId: string, organizationId: string) {
-  const membership = await getMembership({ userId, organizationId });
-  if (!membership) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Organization not found",
-    });
-  }
-  if (membership.role !== ORG_ROLE.OWNER) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only owners can perform this action",
-    });
-  }
-}
 
 export const organizationsRouter = router({
   list: protectedProcedure
