@@ -18,4 +18,5 @@ model Contact {
   updatedByUser        User?          @relation("ContactUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
   usersWithThisProfile User[]         @relation("UserContactLink")
   conversations        Conversation[]
+  employees            Employee[]
 }

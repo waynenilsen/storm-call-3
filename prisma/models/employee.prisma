@@ -1,0 +1,18 @@
+model Employee {
+  id                String       @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contactId         String
+  contact           Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  notes             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdByUserId   String?
+  updatedByUserId   String?
+  createdByUserName String?
+  updatedByUserName String?
+  createdByUser     User?        @relation("EmployeeCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedByUser     User?        @relation("EmployeeUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
