@@ -12,6 +12,7 @@ model User {
   updatedAt              DateTime           @updatedAt
   memberships            UserOrganization[]
   sessions               Session[]
+  passwordResetTokens    PasswordResetToken[]
   contactsCreated        Contact[]          @relation("ContactCreatedBy")
   contactsUpdated        Contact[]          @relation("ContactUpdatedBy")
   calloutsCreated        Callout[]          @relation("CalloutCreatedBy")
